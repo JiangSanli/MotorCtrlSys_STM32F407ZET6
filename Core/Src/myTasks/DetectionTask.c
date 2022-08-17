@@ -51,7 +51,7 @@ void StartDetectionTask(void *argument)
 					osDelay(20);
 					while (KEY1_Pressed()){osDelay(1);}
 					DetectionTask_STATE = 20;
-					printf("Key0 pressed!\r\n");
+					//printf("Key1 pressed!\r\n");
 				}
 			}
 			break;
@@ -67,9 +67,11 @@ void StartDetectionTask(void *argument)
 			Cap_Value0 = Cap_Calculate(0);
 			osDelay(2);
 			Cap_Value1 = Cap_Calculate(1);
+			osDelay(2);
 			Calibration_Cap = Cap_Value0 - Cap_Value1;
-			printf("***Cap_Value0 = %.2f    Cap_Value1 = %.2f --->  Calibration_Cap = %.2f  ***\r\n",Cap_Value0,Cap_Value1,Calibration_Cap);
-			osDelay(200);
+			//printf("***Cap_Value0 = %.2f    Cap_Value1 = %.2f --->  Calibration_Cap = %.2f  ***\r\n",Cap_Value0,Cap_Value1,Calibration_Cap);
+			printf("%.2f\t%.2f\t%.2f\n",Cap_Value0,Cap_Value1,Calibration_Cap);
+			osDelay(6);
 			//DetectionTask_STATE = 0;
 			break;
 

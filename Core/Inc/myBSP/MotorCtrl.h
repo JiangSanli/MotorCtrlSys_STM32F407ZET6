@@ -4,7 +4,9 @@
 
 #include "main.h"
 
-#define MOTORTIM_TMR 100000 // 设定STM32F4单片机计时器中断频率为100kHz
+#define MOTORTIM_TMR 100000			 	// 设定STM32F4单片机计时器中断频率为100kHz
+#define Encoder2_0position_number 1000		//编码器2:设定0位编码器的计数值，便于对负数进行计算
+#define Encoder3_0position_number 64535		//编码器2:设定0位编码器的计数值，便于对负数进行计算
 
 //#define CiFenLi  		// 磁分离电机控制，define了后则执行磁分离部分代码
 #define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制

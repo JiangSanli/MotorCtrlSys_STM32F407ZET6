@@ -145,11 +145,13 @@ void StartTask03(void *argument)
 
 	Motor_Data_Init();
 	osDelay(300);
-	myTask03_Status = ALL_Motors_Init();
+	//myTask03_Status = ALL_Motors_Init();
 	osDelay(300);
 
 	uint32_t Encoder3_counter ;
-	uint8_t Direction_Encoder3;
+	uint8_t Direction_Encoder3 ;
+	uint32_t Encoder2_counter ;
+	uint8_t Direction_Encoder2 ;
 
 	//微流控设备暂无光电传感器等0位标志，上电时认为初始位置为0为
 	Motor[5].StepPosition = 0 ;
@@ -187,38 +189,41 @@ void StartTask03(void *argument)
 			break;
 
 		case 1:
-			osDelay(300);
+			osDelay(100);
 			MotorMove_position_Enocder(&Motor[2],2800) ;
-			osDelay(1000);
+			osDelay(2000);
 			if (Motor[2].Status == 0){myTask03_Status = 2;}
 			break;
 
 		case 2:
 			osDelay(100);
 			MotorMove_position_Enocder(&Motor[3],1800) ;
-			osDelay(1000);
+			osDelay(1500);
 			if (Motor[3].Status == 0){myTask03_Status = 3;}
 			break;
 
 		case 3:
-			MotorMove_position_Enocder(&Motor[3],0) ;
-			osDelay(1000);
+			MotorMove_position_Enocder(&Motor[3],300) ;
+			osDelay(1500);
 			if (Motor[3].Status == 0){myTask03_Status = 4;}
 			break;
 
 		case 4:
 			osDelay(100);
-			MotorMove_position_Enocder(&Motor[2],0) ;
-			osDelay(1000);
+			MotorMove_position_Enocder(&Motor[2],300) ;
+			osDelay(2000);
 			if (Motor[2].Status == 0){myTask03_Status = 1;}
 			break;
 
 		case 22:
-			osDelay(5000);
+			osDelay(2000);
+			Encoder2_counter = __HAL_TIM_GET_COUNTER(&htim4);
+			Direction_Encoder2 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4);
 			Encoder3_counter = __HAL_TIM_GET_COUNTER(&htim3);
 			Direction_Encoder3 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
-			printf("***Encoder2_counter = %ld , Direction_Encoder2 = %d ***\r\n",Encoder3_counter,Direction_Encoder3);
-			printf("Motor[3].StepPosition : %ld\r\n",Motor[3].StepPosition);
+			printf("***Encoder2_counter = %ld , Direction_Encoder2 = %d  Motor[2].StepPosition : %ld***\r\n",Encoder2_counter,Direction_Encoder2,Motor[2].StepPosition);
+			printf("***Encoder3_counter = %ld , Direction_Encoder3 = %d  Motor[3].StepPosition : %ld***\r\n",Encoder3_counter,Direction_Encoder3,Motor[3].StepPosition);
+
 			break;
 
 		case INITFAILSTATE:

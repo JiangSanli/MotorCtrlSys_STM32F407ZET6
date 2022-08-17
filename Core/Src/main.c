@@ -291,7 +291,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else if (Motor[1].NumberofSteps <= 0){
 				Motor[1].Status = 0;
-				printf("---Motor1 Run TimeOut.. Position:%ld---\r\n",Motor[1].StepPosition);
+				printf("[WRONG]Motor1 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[1].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim10);
 			}
 
@@ -340,15 +340,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 #endif
 			}
-			if(Motor[2].StepPosition == Motor[2].TargetPosition)
-			{
+
+			if(Motor[2].StepPosition == Motor[2].TargetPosition){
 				Motor[2].Status = 0;
 				printf("---Motor2 Steps Position:%ld---\r\n",Motor[2].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim11);
 			}
 			else if (Motor[2].NumberofSteps <= 0){
 				Motor[2].Status = 0;
-				printf("[WRONG]Motor2 Run TimeOut... Current_Position:%ld---\r\n",Motor[2].StepPosition);
+				printf("[WRONG]Motor2 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[2].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim11);
 			}
 
@@ -396,6 +396,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 #endif
 			}
+
 			if(Motor[3].StepPosition == Motor[3].TargetPosition)
 			{
 				Motor[3].Status = 0;
@@ -404,7 +405,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else if (Motor[3].NumberofSteps <= 0){
 				Motor[3].Status = 0;
-				printf("---Motor3 Run TimeOut.. Position:%ld---\r\n",Motor[3].StepPosition);
+				printf("[WRONG]Motor3 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[3].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim13);
 			}
 
@@ -459,7 +460,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else if (Motor[4].NumberofSteps <= 0){
 				Motor[4].Status = 0;
-				printf("---Motor4 Run TimeOut.. Position:%ld---\r\n",Motor[4].StepPosition);
+				printf("[WRONG]Motor4 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[4].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim14);
 			}
 
@@ -547,7 +548,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else if (Motor[5].NumberofSteps <= 0){
 				Motor[5].Status = 0;
-				printf("---Motor5 Run TimeOut!!! Position:%ld---\r\n",Motor[5].StepPosition);
+				printf("[WRONG]Motor5 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[5].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim6);
 			}
 
@@ -632,7 +633,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else if (Motor[6].NumberofSteps <= 0){
 				Motor[6].Status = 0;
-				printf("---Motor[6] Run TimeOut!!! Position:%ld---\r\n",Motor[6].StepPosition);
+				printf("[WRONG]Motor6 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[6].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim7);
 			}
 

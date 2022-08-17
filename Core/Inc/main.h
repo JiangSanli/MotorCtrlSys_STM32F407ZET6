@@ -34,6 +34,7 @@ extern "C" {
 #include "MotorCtrl.h"
 #include "stdio.h"
 #include "string.h"
+#include "tim.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

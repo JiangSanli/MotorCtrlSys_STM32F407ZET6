@@ -22,7 +22,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "main.h"
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/
@@ -295,6 +295,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	else {
         		if(Motor[2].MotorDirection == 0){
         			Motor[2].StepPosition =0 ;
+        			__HAL_TIM_SET_COUNTER(&htim4,Encoder2_0position_number);
         		}
         	}
             break;
@@ -307,6 +308,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	else {
         		if(Motor[3].MotorDirection == 0){
         			Motor[3].StepPosition =0 ;
+        			__HAL_TIM_SET_COUNTER(&htim3,Encoder3_0position_number);
         		}
         	}
             break;

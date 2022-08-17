@@ -14,7 +14,6 @@
 #include "stdlib.h"
 #include "FDC2112.h"
 
-
 /* ****************
  * 函数名：FDC2112_Write_Reg_I2C2
  * 描述：写FDC2112的寄存器数据，写入数据格式为uint16_t
@@ -51,7 +50,8 @@ uint16_t FDC2112_Read_Data_I2C(uint16_t ADDR_MSB)   //FDC2112只有MSB的12bit�
 	uint8_t temp[2];
 	if ( HAL_I2C_Mem_Read_IT(&hi2c2,FDC2112_R,ADDR_MSB,I2C_MEMADD_SIZE_8BIT,&temp[0],2) == HAL_OK){
 	//if ( HAL_I2C_Mem_Read_DMA(&hi2c2,FDC2112_R,ADDR_MSB,I2C_MEMADD_SIZE_8BIT,&temp[0],2) == HAL_OK){    // DMA模式有问题
-		printf("HAL_OK get\r\n");
+		//printf("HAL_OK get\r\n");
+		HAL_Delay(1);
 		temp[0] = temp[0]<<4;
 		temp[0] = temp[0]>>4;
 		data_temp = (unsigned int)( (temp[0]<<8) + temp[1] ) ;

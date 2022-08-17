@@ -121,7 +121,7 @@ void MX_TIM3_Init(void)
   }
   /* USER CODE BEGIN TIM3_Init 2 */
 #ifdef JiaYangZhen_EncoderMode
-  HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 #endif
   /* USER CODE END TIM3_Init 2 */
 
@@ -167,7 +167,7 @@ void MX_TIM4_Init(void)
   }
   /* USER CODE BEGIN TIM4_Init 2 */
 #ifdef JiaYangZhen_EncoderMode
-  HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL);
 #endif
   /* USER CODE END TIM4_Init 2 */
 

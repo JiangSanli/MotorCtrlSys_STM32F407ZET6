@@ -283,12 +283,7 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 0 */
 
 #ifdef JiaYangZhen_EncoderMode
-	if (__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3)){
-		Motor[3].StepPosition++;
-	}
-	else{
-		Motor[3].StepPosition--;
-	}
+	Motor[3].StepPosition = Encoder3_0position_number - (__HAL_TIM_GET_COUNTER(&htim3)) ;
 #endif
 
   /* USER CODE END TIM3_IRQn 0 */
@@ -306,12 +301,7 @@ void TIM4_IRQHandler(void)
   /* USER CODE BEGIN TIM4_IRQn 0 */
 
 #ifdef JiaYangZhen_EncoderMode
-	if (__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4)){
-		Motor[2].StepPosition--;
-	}
-	else{
-		Motor[2].StepPosition++;
-	}
+	Motor[2].StepPosition = __HAL_TIM_GET_COUNTER(&htim4) - Encoder2_0position_number ;
 #endif
 
   /* USER CODE END TIM4_IRQn 0 */
