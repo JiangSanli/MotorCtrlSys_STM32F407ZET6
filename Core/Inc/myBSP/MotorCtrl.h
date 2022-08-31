@@ -10,7 +10,7 @@
 
 //#define CiFenLi  		// 磁分离电机控制，define了后则执行磁分离部分代码
 #define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
-#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
+//#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
@@ -18,7 +18,7 @@ struct MotorDefine {
 	float    step_angle;				// 步距角
 	uint32_t mircro_steps; 				// 细分数（根据不同型号和使用场景匹配）
 	float    MaxSpeedInRads;			// 电机运转最高转速 rads/s
-	uint32_t Encoder_PulsePerRad;		// 如果使用编码器，电机走一圈，编码器的脉冲数量
+	//uint32_t Encoder_PulsePerRad;		// 如果使用编码器，电机走一圈，编码器的脉冲数量
 
 	//设定的电机编号、方向、速度、距离、加速度和减速度
 	//位置控制模式只需要输入MotorNumber，StepPosition，启动速度、目标速度、加减色为默认值，方向和距离根据位置计算
@@ -53,8 +53,8 @@ extern struct MotorDefine Motor[10];
 
 #define ACCEL 				1
 #define DECEL 				2
-#define MotorInitDelay  	120
-#define MotorInitDelay1 	300
+#define MotorInitDelay  	100
+#define MotorResetDelay  	120
 #define FAIL 				0
 #define SUCCESS 			1
 #define INITFAILSTATE 		100

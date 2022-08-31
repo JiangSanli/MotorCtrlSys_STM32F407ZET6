@@ -18,6 +18,8 @@
 #include "stdio.h"
 #include "MotorCtrl.h"
 #include "ScheduleTable.h"
+#include "FDC2112.h"
+
 
 #ifdef  CiFenLi
 #define CiFenLi_KeepStatic_time 1000
@@ -145,17 +147,8 @@ void StartTask03(void *argument)
 
 	Motor_Data_Init();
 	osDelay(300);
-	//myTask03_Status = ALL_Motors_Init();
+	myTask03_Status = ALL_Motors_Init();
 	osDelay(300);
-
-	uint32_t Encoder3_counter ;
-	uint8_t Direction_Encoder3 ;
-	uint32_t Encoder2_counter ;
-	uint8_t Direction_Encoder2 ;
-
-	//微流控设备暂无光电传感器等0位标志，上电时认为初始位置为0为
-	Motor[5].StepPosition = 0 ;
-	Motor[6].StepPosition = 0 ;
 
 	for(;;)
 	{
@@ -190,40 +183,73 @@ void StartTask03(void *argument)
 
 		case 1:
 			osDelay(100);
-			MotorMove_position_Enocder(&Motor[2],2800) ;
-			osDelay(2000);
-			if (Motor[2].Status == 0){myTask03_Status = 2;}
+#ifdef JiaYangZhen_EncoderMode
+			MotorMove_position_Enocder(&Motor[2],3100) ;
+#else
+			MotorMove_position(&Motor[2],2480*4) ;
+#endif
+			osDelay(3600);
+			if (Motor[2].Status == 0){myTask03_Status = 4;}
 			break;
 
 		case 2:
 			osDelay(100);
+#ifdef JiaYangZhen_EncoderMode
 			MotorMove_position_Enocder(&Motor[3],1800) ;
+#else
+			MotorMove_position(&Motor[3],1440*4) ;
+#endif
 			osDelay(1500);
 			if (Motor[3].Status == 0){myTask03_Status = 3;}
 			break;
 
 		case 3:
-			MotorMove_position_Enocder(&Motor[3],300) ;
+#ifdef JiaYangZhen_EncoderMode
+			MotorMove_position_Enocder(&Motor[3],-30) ;
+#else
+			MotorMove_position(&Motor[3],-80) ;
+#endif
 			osDelay(1500);
 			if (Motor[3].Status == 0){myTask03_Status = 4;}
 			break;
 
 		case 4:
 			osDelay(100);
-			MotorMove_position_Enocder(&Motor[2],300) ;
-			osDelay(2000);
+#ifdef JiaYangZhen_EncoderMode
+			MotorMove_position_Enocder(&Motor[2],-30) ;
+#else
+			MotorMove_position(&Motor[2],-80) ;
+#endif
+			osDelay(3000);
 			if (Motor[2].Status == 0){myTask03_Status = 1;}
 			break;
 
 		case 22:
-			osDelay(2000);
-			Encoder2_counter = __HAL_TIM_GET_COUNTER(&htim4);
-			Direction_Encoder2 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim4);
-			Encoder3_counter = __HAL_TIM_GET_COUNTER(&htim3);
-			Direction_Encoder3 = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
-			printf("***Encoder2_counter = %ld , Direction_Encoder2 = %d  Motor[2].StepPosition : %ld***\r\n",Encoder2_counter,Direction_Encoder2,Motor[2].StepPosition);
-			printf("***Encoder3_counter = %ld , Direction_Encoder3 = %d  Motor[3].StepPosition : %ld***\r\n",Encoder3_counter,Direction_Encoder3,Motor[3].StepPosition);
+			DetectionTask_STATE = Cap0_Sample_State;
+			printf("---Enter Liquid following mode---\r\n");
+			HAL_TIM_Base_Start_IT(Motor[3].htim_x);
+			myTask03_Status = 23;
+			break;
 
+		case 23:
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 24;
+					printf("Key2 pressed!\r\n");
+				}
+			}
+			break;
+
+		case 24:
+			HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
+			DetectionTask_STATE = INITPASSSTATE;
+			myTask03_Status = INITPASSSTATE;
+			printf("---Close Liquid following mode---\r\n");
 			break;
 
 		case INITFAILSTATE:

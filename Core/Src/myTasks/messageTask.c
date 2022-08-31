@@ -87,9 +87,11 @@ void StartmessageTask(void *argument)
 				if (USART5_RX_BUF[3] == 0b00000001){	// 不带编码器模式
 					MotorMove_position(&Motor_Temp,Motor_Temp.TargetPosition);
 				}
+#ifdef JiaYangZhen_EncoderMode
 				else if (USART5_RX_BUF[3] == 0b00000010){	// 带编码器模式
 					MotorMove_position_Enocder(&Motor_Temp,Motor_Temp.TargetPosition);
 				}
+#endif
 				USART_RX_STA=0;
 			break;
 

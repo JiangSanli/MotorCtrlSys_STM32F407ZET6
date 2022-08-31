@@ -50,14 +50,14 @@ void Motor_Data_Init(void)
 	//机械参数
 	Motor[2].deceleration_ratio = 1;
 	Motor[2].step_angle = 1.8;
-	Motor[2].mircro_steps = 4;
+	Motor[2].mircro_steps = 16;
 	Motor[2].MaxSpeedInRads= 25;
-	Motor[2].Encoder_PulsePerRad = 1000;
+	//Motor[2].Encoder_PulsePerRad = 1000;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[2].StartupSpeedInRads = 1;
-	Motor[2].DesiredSpeedInRads = 6;
-	Motor[2].accelerationRate = 3000;
-	Motor[2].decelerationRate = 2500;
+	Motor[2].DesiredSpeedInRads = 12;
+	Motor[2].accelerationRate = 8000;
+	Motor[2].decelerationRate = 5000;
 
 /*  Motor3: 加样针垂直方向步进电机,4细分800步每圈，编码器为1000P/R  */
 	Motor[3].MotorNumber = 3;
@@ -66,14 +66,14 @@ void Motor_Data_Init(void)
 	//机械参数
 	Motor[3].deceleration_ratio = 1;
 	Motor[3].step_angle = 1.8;
-	Motor[3].mircro_steps = 4;
+	Motor[3].mircro_steps = 16;
 	Motor[3].MaxSpeedInRads= 25;
-	Motor[2].Encoder_PulsePerRad = 1000;
+	//Motor[2].Encoder_PulsePerRad = 1000;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[3].StartupSpeedInRads = 1;
-	Motor[3].DesiredSpeedInRads = 5;
-	Motor[3].accelerationRate = 3600;
-	Motor[3].decelerationRate = 3200;
+	Motor[3].DesiredSpeedInRads = 10;
+	Motor[3].accelerationRate = 9000;
+	Motor[3].decelerationRate = 6000;
 #endif
 
 /*  Motor4 : 柱塞泵，负责注液（也可以抽液），最大排量1000uL，总行程10rads（2000步），每步0.5uL  */
@@ -176,7 +176,7 @@ uint8_t ALL_Motors_Init(void)  // 所有电机初始化
 	VM7_Enable_A();	VM7_Enable_B();
 	VM8_Enable_A();	VM8_Enable_B();
 	osDelay(200);
-	uint8_t InitState = 0 ;
+	uint8_t InitState = 11 ;
 	uint8_t ResetResult1 = 0;
 	uint8_t ResetResult2 = 0;
 	uint8_t ResetResult4 = 0;
@@ -184,37 +184,49 @@ uint8_t ALL_Motors_Init(void)  // 所有电机初始化
 	{
 		switch (InitState)
 		{
-			case 0:
+			case 11:
 				ResetResult4 = Motor_Reset(&Motor[4]);
-				osDelay(MotorInitDelay1);
+				osDelay(MotorInitDelay);
+				InitState = 12 ;
+
+			case 12:
 				if (ResetResult4){
-					InitState = 1 ;
+					InitState = 21 ;
 				}
 				else{
 					InitState = INITFAILSTATE ;
 				}
+				osDelay(MotorInitDelay);
 				break ;
 
-			case 1:
+			case 21:
 				ResetResult2 = Motor_Reset(&Motor[2]);
-				osDelay(MotorInitDelay1);
+				osDelay(MotorInitDelay);
+				InitState = 22 ;
+
+			case 22:
 				if (ResetResult2){
-					InitState = 2 ;
+					InitState = 31 ;
 				}
 				else{
 					InitState = INITFAILSTATE ;
 				}
+				osDelay(MotorInitDelay);
 				break ;
 
-			case 2:
+			case 31:
 				ResetResult1 = Motor_Reset(&Motor[1]);
-				osDelay(MotorInitDelay1);
+				osDelay(MotorInitDelay);
+				InitState = 32 ;
+
+			case 32:
 				if (ResetResult1){
 					InitState = INITPASSSTATE ;
 				}
 				else{
 					InitState = INITFAILSTATE ;
 				}
+				osDelay(MotorInitDelay);
 				break ;
 
 			case INITPASSSTATE:
@@ -242,35 +254,42 @@ uint8_t ALL_Motors_Init(void)  // 电机初始化，找到0位并把电机位置
 	VM7_Enable_A();	VM7_Enable_B();
 	VM8_Enable_A();	VM8_Enable_B();
 	osDelay(200);
-	uint8_t InitState = 0 ;
+	uint8_t InitState = 11 ;
 	uint8_t ResetResult2 = 0;
 	uint8_t ResetResult3 = 0;
 	while(1)
 	{
 		switch (InitState)
 		{
-			case 0:
+			case 11:
 				ResetResult3 = Motor_Reset(&Motor[3]);
-				osDelay(MotorInitDelay1);
+				osDelay(MotorInitDelay);
+				InitState = 12 ;
+
+			case 12:
 				if (ResetResult3){
-					InitState = 1 ;
+					InitState = 21 ;
 				}
 				else{
 					InitState = INITFAILSTATE ;
 				}
+				osDelay(MotorInitDelay);
 				break ;
 
-			case 1:
+			case 21:
 				ResetResult2 = Motor_Reset(&Motor[2]);
-				osDelay(MotorInitDelay1);
+				osDelay(MotorInitDelay);
+				InitState = 22 ;
+
+			case 22:
 				if (ResetResult2){
 					InitState = INITPASSSTATE ;
 				}
 				else{
 					InitState = INITFAILSTATE ;
 				}
+				osDelay(MotorInitDelay);
 				break ;
-
 
 			case INITPASSSTATE:
 				printf("All Motors Initialization Completed!\r\n");
@@ -577,6 +596,49 @@ void MotorMove_position_Enocder(struct MotorDefine *temp  , int32_t targer_posit
 }
 #endif
 
+void MotorRun_LowSpeed(struct MotorDefine *temp)
+{
+	if (Motor[temp->MotorNumber].Status == 1){
+		printf("[WRONG]MotorRun_LowSpeed Failed,Motor%d is busy!\r\n",Motor[temp->MotorNumber].MotorNumber);
+		return ;
+	}
+	else {
+		Motor[temp->MotorNumber].Status = 1 ;
+	}
+
+	temp->deceleration_ratio = Motor[temp->MotorNumber].deceleration_ratio ;
+	temp->step_angle = Motor[temp->MotorNumber].step_angle ;
+	temp->mircro_steps = Motor[temp->MotorNumber].mircro_steps ;
+	temp->MaxSpeedInRads = Motor[temp->MotorNumber].MaxSpeedInRads ;
+	temp->htim_x = Motor[temp->MotorNumber].htim_x ;
+
+	// 计算： 单圈步数、启动速度、目标速度、行进步数、加减速时间
+	temp->StepsInOneCircle = (360 / temp->step_angle) * temp->deceleration_ratio * temp->mircro_steps;
+	temp->StartupSpeedInHz = temp->StepsInOneCircle * temp->StartupSpeedInRads ;
+	temp->StepperSpeedTMR = MOTORTIM_TMR / temp->StartupSpeedInHz;
+	temp->NumberofSteps = temp->NumberofRads * temp->StepsInOneCircle ;
+
+	//不进行加减速，电机保持最小速度运行
+	Motor[temp->MotorNumber].NumberofSteps_StopAccel = temp->NumberofSteps;
+	Motor[temp->MotorNumber].NumberofSteps_BeginDecel = 0;
+
+	Motor[temp->MotorNumber].StepsInOneCircle = temp->StepsInOneCircle ;
+	Motor[temp->MotorNumber].StartupSpeedInHz = temp->StartupSpeedInHz ;
+//	Motor[temp->MotorNumber].ActualSpeedInHz = temp->ActualSpeedInHz ;
+//	Motor[temp->MotorNumber].DesiredSpeedInHz = temp->DesiredSpeedInHz ;
+	Motor[temp->MotorNumber].StepperSpeedTMR = temp->StepperSpeedTMR ;
+	Motor[temp->MotorNumber].NumberofSteps = temp->NumberofSteps ;
+	Motor[temp->MotorNumber].MotorDirection = temp->MotorDirection ;
+	Motor[temp->MotorNumber].AccelerationTimeTMR = 10000 ;
+	Motor[temp->MotorNumber].DecelerationTimeTMR = 10000 ;
+	Motor[temp->MotorNumber].TargetPosition = -16777200 ; //暂时设置目标位置为无法达到的值，参数控制模式用步进数控制中断停止
+
+	MotorDirection_SetUp(&Motor[temp->MotorNumber]) ;
+	//print_MotorInformation(&Motor[temp->MotorNumber]);
+	HAL_TIM_Base_Start_IT(Motor[temp->MotorNumber].htim_x);
+}
+
+
 /*            *****************    0x20-0b00100000 电机复位 ：  ****************** */
 // 根据协议，通过USART5进行出串口通讯，输入步进电机的 【地址】 即可，使用程序优化配置好的电机参数对电机进行复位（需要配合0位开关）
 // 返回值： SUCCESS-1-完成，正在运行  FAIL-0
@@ -594,32 +656,32 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 	if (temp->MotorNumber == 1){
 		if ( Motor1_reset_OPTstatus ){
 			temp->MotorDirection = 1 ;
-			MotorMove_steps(temp);
-			osDelay(MotorInitDelay);
+			MotorRun_LowSpeed(temp);
+			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor1_reset_OPTstatus ; i++){
 				if(i>500) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
 		}
-		osDelay(MotorInitDelay1);
+		HAL_Delay(MotorResetDelay);
 		if (Motor1_Nreset_OPTstatus){
 			temp->MotorDirection = 0 ;
-			MotorMove_steps(temp);
+			MotorRun_LowSpeed(temp);
 			for(uint32_t i=0 ; Motor1_Nreset_OPTstatus ; i++){
 				if(i>5000) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
+			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}
@@ -627,32 +689,32 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 	if (temp->MotorNumber == 2){
 		if ( Motor2_reset_OPTstatus ){
 			temp->MotorDirection = 1 ;
-			MotorMove_steps(temp);
-			osDelay(MotorInitDelay);
+			MotorRun_LowSpeed(temp);
+			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor2_reset_OPTstatus ; i++){
 				if(i>500) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
 		}
-		osDelay(MotorInitDelay1);
+		HAL_Delay(MotorResetDelay);
 		if (Motor2_Nreset_OPTstatus){
 			temp->MotorDirection = 0 ;
-			MotorMove_steps(temp);
+			MotorRun_LowSpeed(temp);
 			for(uint32_t i=0 ; Motor2_Nreset_OPTstatus ; i++){
 				if(i>5000) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
+			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}
@@ -660,32 +722,32 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 	if (temp->MotorNumber == 3){
 		if ( Motor3_reset_OPTstatus ){
 			temp->MotorDirection = 1 ;
-			MotorMove_steps(temp);
-			osDelay(MotorInitDelay);
+			MotorRun_LowSpeed(temp);
+			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor3_reset_OPTstatus ; i++){
 				if(i>500) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
 		}
-		osDelay(MotorInitDelay1);
+		HAL_Delay(MotorResetDelay);
 		if (Motor3_Nreset_OPTstatus){
 			temp->MotorDirection = 0 ;
-			MotorMove_steps(temp);
+			MotorRun_LowSpeed(temp);
 			for(uint32_t i=0 ; Motor3_Nreset_OPTstatus ; i++){
 				if(i>5000) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
+			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}
@@ -693,32 +755,32 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 	if (temp->MotorNumber == 4){
 		if ( Motor4_reset_OPTstatus ){
 			temp->MotorDirection = 1 ;
-			MotorMove_steps(temp);
-			osDelay(MotorInitDelay);
+			MotorRun_LowSpeed(temp);
+			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor4_reset_OPTstatus ; i++){
 				if(i>500) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
 		}
-		osDelay(MotorInitDelay1);
+		HAL_Delay(MotorResetDelay);
 		if (Motor4_Nreset_OPTstatus){
 			temp->MotorDirection = 0 ;
-			MotorMove_steps(temp);
+			MotorRun_LowSpeed(temp);
 			for(uint32_t i=0 ; Motor4_Nreset_OPTstatus ; i++){
 				if(i>5000) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
-				else {osDelay(1);}
+				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
+			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}

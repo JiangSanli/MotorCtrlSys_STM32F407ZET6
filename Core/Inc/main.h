@@ -35,6 +35,7 @@ extern "C" {
 #include "stdio.h"
 #include "string.h"
 #include "tim.h"
+#include "FDC2112.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

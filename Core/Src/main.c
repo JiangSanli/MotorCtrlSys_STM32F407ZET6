@@ -375,57 +375,89 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 			timecount_TIM13++;
 			AccelDecelcount_TIM13++;
-			if(timecount_TIM13 <= Pluse_High)
-			{
-				Motorpluse3_High();
+			if (Motor[3].StepPosition > 5000){
+				printf("[WRONG]OverTrip!!!,Motor[3].StepPosition:%ld\r\n",Motor[3].StepPosition);
+				HAL_TIM_Base_Stop_IT(&htim13);
 			}
-			else if(timecount_TIM13 > Pluse_High)
-			{
-				Motorpluse3_Low();
-			}
-			if(timecount_TIM13 >= Motor[3].StepperSpeedTMR)
-			{
-				timecount_TIM13 = 0 ;
-				Motor[3].NumberofSteps--;
+			if (DetectionTask_STATE == Cap0_Sample_State){
+				switch (Follow_state){
+				case 1:
+					if(timecount_TIM13 <= Pluse_High){
+						Motorpluse3_High();
+					}
+					else if(timecount_TIM13 > Pluse_High){
+						Motorpluse3_Low();
+					}
+					if(timecount_TIM13 >= Motor[3].StepperSpeedTMR){
+						timecount_TIM13 = 0 ;
 #ifndef JiaYangZhen_EncoderMode
-				if (Motor[3].MotorDirection == 1){
-					Motor[3].StepPosition++;
-				}
-				else{
-					Motor[3].StepPosition--;
-				}
+							Motor[3].StepPosition++;
 #endif
-			}
-
-			if(Motor[3].StepPosition == Motor[3].TargetPosition)
-			{
-				Motor[3].Status = 0;
-				printf("---Motor3 Steps Position:%ld---\r\n",Motor[3].StepPosition);
-				HAL_TIM_Base_Stop_IT(&htim13);
-			}
-			else if (Motor[3].NumberofSteps <= 0){
-				Motor[3].Status = 0;
-				printf("[WRONG]Motor3 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[3].StepPosition);
-				HAL_TIM_Base_Stop_IT(&htim13);
-			}
-
-			if (Motor[3].NumberofSteps > Motor[3].NumberofSteps_StopAccel)
-			{
-				if(AccelDecelcount_TIM13 >= Motor[3].AccelerationTimeTMR)
-				{
-					AccelDecelcount_TIM13=0;
-					AccelDecel(ACCEL,&Motor[3]);
+					}
+					break;
+				case 2:
+					timecount_TIM13 = 0 ;
+					break;
+				case 3:
+					if(timecount_TIM13 <= Pluse_High){
+						Motorpluse3_High();
+					}
+					else if(timecount_TIM13 > Pluse_High){
+						Motorpluse3_Low();
+					}
+					if(timecount_TIM13 >= Motor[3].StepperSpeedTMR){
+						timecount_TIM13 = 0 ;
+#ifndef JiaYangZhen_EncoderMode
+							Motor[3].StepPosition--;
+#endif
+					}
+					break;
 				}
 			}
-			else if (Motor[3].NumberofSteps < Motor[3].NumberofSteps_BeginDecel)
-			{
-				if(AccelDecelcount_TIM13 >= Motor[3].DecelerationTimeTMR)
-				{
-					AccelDecelcount_TIM13=0;
-					AccelDecel(DECEL,&Motor[3]);
+			else{
+				if(timecount_TIM13 <= Pluse_High){
+					Motorpluse3_High();
+				}
+				else if(timecount_TIM13 > Pluse_High){
+					Motorpluse3_Low();
+				}
+				if(timecount_TIM13 >= Motor[3].StepperSpeedTMR){
+					timecount_TIM13 = 0 ;
+					Motor[3].NumberofSteps--;
+#ifndef JiaYangZhen_EncoderMode
+					if (Motor[3].MotorDirection == 1){
+						Motor[3].StepPosition++;
+					}
+					else{
+						Motor[3].StepPosition--;
+					}
+#endif
+				}
+
+				if(Motor[3].StepPosition == Motor[3].TargetPosition){
+					Motor[3].Status = 0;
+					//printf("---Motor3 Steps Position:%ld---\r\n",Motor[3].StepPosition);
+					HAL_TIM_Base_Stop_IT(&htim13);
+				}
+				else if (Motor[3].NumberofSteps <= 0){
+					Motor[3].Status = 0;
+					printf("[WRONG]Motor3 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[3].StepPosition);
+					HAL_TIM_Base_Stop_IT(&htim13);
+				}
+
+				if (Motor[3].NumberofSteps > Motor[3].NumberofSteps_StopAccel){
+					if(AccelDecelcount_TIM13 >= Motor[3].AccelerationTimeTMR){
+						AccelDecelcount_TIM13=0;
+						AccelDecel(ACCEL,&Motor[3]);
+					}
+				}
+				else if (Motor[3].NumberofSteps < Motor[3].NumberofSteps_BeginDecel){
+					if(AccelDecelcount_TIM13 >= Motor[3].DecelerationTimeTMR){
+						AccelDecelcount_TIM13=0;
+						AccelDecel(DECEL,&Motor[3]);
+					}
 				}
 			}
-
 
 	}
 

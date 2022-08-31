@@ -7,6 +7,12 @@
 #include "stdio.h"
 #include "string.h"
 
+#define Cap0_Sample_State	11
+extern 	uint8_t DetectionTask_STATE ;
+#define I2C_Read_Delay		1
+extern 	float Cap_Value_Calibrated[2] ;
+extern 	uint8_t Follow_state ;
+
 // FDC2x1x Internal master clock frequency range : 35 - 55MHz  Typical fclk : 43.4MHz
 #define FDC2112_Address 	0x2A	// ADDR->low: 0x2A , ADDR->high: 0x2B
 #define FDC2112_W 			FDC2112_Address<<1		// 0:Write
@@ -46,8 +52,6 @@
 //#define DRIVE_CURRENT_CH3 0x21
 #define MANUFACTURER_ID 0x7E	//[15:0]  Manufacturer ID = 0x5449
 #define DEVICE_ID 0x7F			//[7:0]Device ID 0x3054 (FDC2112, FDC2114 only)
-
-
 
 void FDC2112_Write_Reg_I2C(uint16_t MemAddress,uint16_t data);
 uint16_t FDC2112_Read_Reg_I2C(uint16_t MemAddress);
