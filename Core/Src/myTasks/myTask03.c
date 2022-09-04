@@ -146,9 +146,13 @@ void StartTask03(void *argument)
 	printf("myTask03 starts! \r\n");
 
 	Motor_Data_Init();
-	osDelay(300);
-	myTask03_Status = ALL_Motors_Init();
-	osDelay(300);
+	osDelay(100);
+	if ( 0b00000110 == ALL_Motors_Init(0b00000110) ){
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
 
 	for(;;)
 	{
@@ -186,10 +190,10 @@ void StartTask03(void *argument)
 #ifdef JiaYangZhen_EncoderMode
 			MotorMove_position_Enocder(&Motor[2],3100) ;
 #else
-			MotorMove_position(&Motor[2],2480*4) ;
+			MotorMove_position(&Motor[2],2080*4) ;
 #endif
-			osDelay(3600);
-			if (Motor[2].Status == 0){myTask03_Status = 4;}
+			osDelay(1500);
+			if (Motor[2].Status == 0){myTask03_Status = 2;}
 			break;
 
 		case 2:
@@ -197,7 +201,7 @@ void StartTask03(void *argument)
 #ifdef JiaYangZhen_EncoderMode
 			MotorMove_position_Enocder(&Motor[3],1800) ;
 #else
-			MotorMove_position(&Motor[3],1440*4) ;
+			MotorMove_position(&Motor[3],1240*4) ;
 #endif
 			osDelay(1500);
 			if (Motor[3].Status == 0){myTask03_Status = 3;}
@@ -253,9 +257,94 @@ void StartTask03(void *argument)
 			break;
 
 		case INITFAILSTATE:
-			printf("[WRONG]All Motors Initialization FAILED!Please Check!\r\n");
+			printf("[WRONG]Motors Initialization FAILED!Please Check!\r\n");
 			osDelay(10000);
+			break;
+		}
+	}
 
+}
+#endif
+
+#ifdef WeiLiuKong
+void StartTask03(void *argument)
+{
+	osDelay(10);
+	uint8_t myTask03_Status ;
+	printf("myTask03 starts! \r\n");
+
+	Motor_Data_Init();
+	osDelay(100);
+	if ( 0b01110000 == ALL_Motors_Init(0b01110000) ){
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
+
+	for(;;)
+	{
+		osDelay(1);
+		switch (myTask03_Status)
+		{
+		case INITPASSSTATE:
+			osDelay(10);
+			if(KEY0_Pressed())
+			{
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					myTask03_Status = 1;
+					printf("Key0 pressed!\r\n");
+				}
+			}
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 22;
+					printf("Key2 pressed!\r\n");
+				}
+			}
+			break;
+
+		case 1:
+			osDelay(5000);
+			printf("test Weiliukong \r\n");
+			break;
+
+		case 2:
+
+			break;
+
+		case 3:
+
+			break;
+
+		case 4:
+
+			break;
+
+		case 22:
+
+			break;
+
+		case 23:
+
+			break;
+
+		case 24:
+
+			break;
+
+		case INITFAILSTATE:
+			//printf("[WRONG]Motors Initialization FAILED!Please Check!\r\n");
+			osDelay(10000);
 			break;
 		}
 	}

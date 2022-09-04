@@ -110,7 +110,6 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
-  MX_TIM8_Init();
   MX_UART4_Init();
   MX_UART5_Init();
   MX_USART3_UART_Init();
@@ -125,6 +124,7 @@ int main(void)
   MX_DMA_Init();
   MX_TIM7_Init();
   MX_TIM6_Init();
+  MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
 
   ALL_Motors_Disable();
@@ -203,6 +203,9 @@ uint32_t timecount_TIM10 = 0;
 uint32_t AccelDecelcount_TIM10 = 0;
 uint32_t timecount_TIM11 = 0;
 uint32_t AccelDecelcount_TIM11 = 0;
+uint32_t timecount_TIM12 = 0;
+uint8_t  Motor7_State = 1 ;
+uint32_t AccelDecelcount_TIM12 = 0;
 uint32_t timecount_TIM13 = 0;
 uint32_t AccelDecelcount_TIM13 = 0;
 uint32_t timecount_TIM14 = 0;
@@ -213,6 +216,7 @@ uint8_t  Motor5_State = 1 ;
 uint32_t timecount_TIM7 = 0;
 uint32_t AccelDecelcount_TIM7 = 0;
 uint8_t  Motor6_State = 1 ;
+
 /* USER CODE END 4 */
 
 /**
@@ -575,11 +579,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			if(Motor[5].StepPosition == Motor[5].TargetPosition){
 				Motor[5].Status = 0;
+				Motor5_Release();
 				printf("---Motor5 Steps Position:%ld---\r\n",Motor[5].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim6);
 			}
 			else if (Motor[5].NumberofSteps <= 0){
 				Motor[5].Status = 0;
+				Motor5_Release();
 				printf("[WRONG]Motor5 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[5].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim6);
 			}
@@ -660,11 +666,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			if(Motor[6].StepPosition == Motor[6].TargetPosition){
 				Motor[6].Status = 0;
+				Motor6_Release();
 				printf("---Motor[6] Steps Position:%ld---\r\n",Motor[6].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim7);
 			}
 			else if (Motor[6].NumberofSteps <= 0){
 				Motor[6].Status = 0;
+				Motor6_Release();
 				printf("[WRONG]Motor6 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[6].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim7);
 			}
@@ -679,6 +687,93 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				if(AccelDecelcount_TIM7 >= Motor[6].DecelerationTimeTMR){
 					AccelDecelcount_TIM7=0;
 					AccelDecel(DECEL,&Motor[6]);
+				}
+			}
+	}
+
+	else if (htim->Instance == TIM12)
+	{
+			timecount_TIM12++;
+			AccelDecelcount_TIM12++;
+
+			if(timecount_TIM12 >= Motor[7].StepperSpeedTMR)
+			{
+				timecount_TIM12 = 0 ;
+				Motor[7].NumberofSteps--;
+
+				if (Motor[7].MotorDirection == 1){
+					switch ( Motor7_State )
+					{
+					case 1:
+						Motor7_AB();
+						Motor7_State = 2 ;
+						break;
+					case 2:
+						Motor7_Ab();
+						Motor7_State = 3 ;
+						break;
+					case 3:
+						Motor7_ab();
+						Motor7_State = 4 ;
+						break;
+					case 4:
+						Motor7_aB();
+						Motor7_State = 1 ;
+						break;
+					}
+				}
+				else{
+					switch ( Motor7_State )
+					{
+					case 1:
+						Motor7_AB();
+						Motor7_State = 2 ;
+						break;
+					case 2:
+						Motor7_aB();
+						Motor7_State = 3 ;
+						break;
+					case 3:
+						Motor7_ab();
+						Motor7_State = 4 ;
+						break;
+					case 4:
+						Motor7_Ab();
+						Motor7_State = 1 ;
+						break;
+					}
+				}
+
+				if (Motor[7].MotorDirection == 1){
+					Motor[7].StepPosition++;
+				}
+				else{
+					Motor[7].StepPosition--;
+				}
+			}
+			if(Motor[7].StepPosition == Motor[7].TargetPosition){
+				Motor[7].Status = 0;
+				Motor7_Release();
+				printf("---Motor[7] Steps Position:%ld---\r\n",Motor[7].StepPosition);
+				HAL_TIM_Base_Stop_IT(&htim12);
+			}
+			else if (Motor[7].NumberofSteps <= 0){
+				Motor[7].Status = 0;
+				Motor7_Release();
+				printf("[WRONG]Motor[7] Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[7].StepPosition);
+				HAL_TIM_Base_Stop_IT(&htim12);
+			}
+
+			if (Motor[7].NumberofSteps > Motor[7].NumberofSteps_StopAccel){
+				if(AccelDecelcount_TIM12 >= Motor[7].AccelerationTimeTMR){
+					AccelDecelcount_TIM12=0;
+					AccelDecel(ACCEL,&Motor[7]);
+				}
+			}
+			else if (Motor[7].NumberofSteps < Motor[7].NumberofSteps_BeginDecel){
+				if(AccelDecelcount_TIM12 >= Motor[7].DecelerationTimeTMR){
+					AccelDecelcount_TIM12=0;
+					AccelDecel(DECEL,&Motor[7]);
 				}
 			}
 	}

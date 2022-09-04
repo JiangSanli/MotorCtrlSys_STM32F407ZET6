@@ -25,8 +25,8 @@
 #include "tim.h"
 
 uint8_t aRxBuffer[1];  // HAL库使用的串口接收缓冲
-uint8_t USART5_RX_BUF[100];	//接收缓冲，最�??100字节
-uint16_t USART_RX_STA = 0;       //接收状�?�标�??
+uint8_t USART5_RX_BUF[100];	//接收缓冲，最�?100字节
+uint16_t USART_RX_STA = 0;       //接收状�?�标�?
 //bit15			接收完成标志 0x55
 //bit14			接收起始标志 0xAA
 //bit13~bit0	接收到的有效字节数目
@@ -90,7 +90,7 @@ void MX_UART5_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN UART5_Init 2 */
-  HAL_UART_Receive_IT(&huart5, (uint8_t *)aRxBuffer, 1);	//该函数会�???????启接收中断：标志位UART_IT_RXNE，并且设置接收缓冲以及接收缓冲接收最大数据量
+  HAL_UART_Receive_IT(&huart5, (uint8_t *)aRxBuffer, 1);	//该函数会�?????????启接收中断：标志位UART_IT_RXNE，并且设置接收缓冲以及接收缓冲接收最大数据量
   /* USER CODE END UART5_Init 2 */
 
 }
@@ -349,13 +349,13 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 /* USER CODE BEGIN 1 */
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) //串口2的中断回调函�??
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) //串口2的中断回调函�????
 {
 	if(huart->Instance==UART5)
 	{
 		if((USART_RX_STA&0x8000)==0)	//如果USART_RX_STA的bit15=0：接收未完成
 		{
-			if((USART_RX_STA&0x4000)==0)	//如果没有收到起始标志,USART_RX_STA的bit15�??0
+			if((USART_RX_STA&0x4000)==0)	//如果没有收到起始标志,USART_RX_STA的bit15�????0
 			{
 				if(aRxBuffer[0]==0xAA)		//如果收到起始标志
 				{

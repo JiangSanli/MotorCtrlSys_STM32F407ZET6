@@ -171,10 +171,6 @@ void Error_Handler(void);
 #define KEY1_GPIO_Port GPIOG
 #define KEY2_Pin GPIO_PIN_8
 #define KEY2_GPIO_Port GPIOG
-#define Encoder1_A_Pin GPIO_PIN_6
-#define Encoder1_A_GPIO_Port GPIOC
-#define Encoder1_B_Pin GPIO_PIN_7
-#define Encoder1_B_GPIO_Port GPIOC
 #define VM6_IN3_Pin GPIO_PIN_8
 #define VM6_IN3_GPIO_Port GPIOC
 #define VM6_IN4_Pin GPIO_PIN_9

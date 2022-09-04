@@ -221,17 +221,11 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = OPT_IN6_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(OPT_IN6_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : PGPin PGPin PGPin PGPin
-                           PGPin PGPin */
-  GPIO_InitStruct.Pin = OPT_IN7_Pin|OPT_IN8_Pin|OPT_IN9_Pin|OPT_IN10_Pin
-                          |OPT_IN11_Pin|OPT_IN12_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+                           PGPin PGPin PGPin */
+  GPIO_InitStruct.Pin = OPT_IN6_Pin|OPT_IN7_Pin|OPT_IN8_Pin|OPT_IN9_Pin
+                          |OPT_IN10_Pin|OPT_IN11_Pin|OPT_IN12_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
@@ -329,11 +323,30 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             break;
 
         case OPT_IN5_Pin:
-
+        	if (OPT_IN5_GPIO_Port->IDR & OPT_IN5_Pin) { 	// if Rising edge trigger
+        		Motor[5].StepPosition =0 ;
+        	}
+        	else {
+        		 ;
+        	}
             break;
 
         case OPT_IN6_Pin:
+        	if (OPT_IN6_GPIO_Port->IDR & OPT_IN6_Pin) { 	// if Rising edge trigger
+        		 ;
+        	}
+        	else {
+        		Motor[6].StepPosition =0 ;
+        	}
+            break;
 
+        case OPT_IN7_Pin:
+        	if (OPT_IN7_GPIO_Port->IDR & OPT_IN7_Pin) { 	// if Rising edge trigger
+        		Motor[7].StepPosition =0 ;
+        	}
+        	else {
+        		 ;
+        	}
             break;
     }
 }

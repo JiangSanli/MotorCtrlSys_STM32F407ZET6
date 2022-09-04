@@ -36,9 +36,8 @@ uint8_t init_Calibration_Value(uint8_t index)
 	for (i=1 ; i<=10 ; i++){
 		temp_value = Cap_Calculate(index);
 		HAL_Delay(I2C_Read_Delay);
-		if (temp_value){	// 如果Cap_Calculate返回0，则表示读取I2C失败
+		if (temp_value < 100000000){	// 如果Cap_Calculate返回inf，则表示读取I2C失败
 			Calibration_Value[index] = Calibration_Value[index] + temp_value;
-			//printf("temp_value:%.2f\r\n",temp_value);
 		}
 		else{
 			printf("[WRONG]init_Calibration_Value FAILED!\r\n");
@@ -61,11 +60,11 @@ void StartDetectionTask(void *argument)
 	osDelay(50);
 	printf("DetectionTask starts! \r\n");
 
-	Init_DoubleChannel_FDC2212();
-	osDelay(100);
-
-	DetectionTask_STATE = init_Calibration_Value(0);
-	osDelay(100);
+//	Init_DoubleChannel_FDC2212();
+//	osDelay(100);
+//	DetectionTask_STATE = init_Calibration_Value(0);
+//	osDelay(100);
+	DetectionTask_STATE = INITPASSSTATE ;
 
 	for(;;)
 	{
@@ -81,10 +80,17 @@ void StartDetectionTask(void *argument)
 				{
 					osDelay(20);
 					while (KEY1_Pressed()){osDelay(1);}
-					DetectionTask_STATE = Cap0_Sample_State;
+					DetectionTask_STATE = 10;
 					printf("Key1 pressed!\r\n");
 				}
 			}
+			break;
+
+		case 10:
+			Init_DoubleChannel_FDC2212();
+			osDelay(100);
+			DetectionTask_STATE = init_Calibration_Value(0);
+			osDelay(300);
 			break;
 
 		case Cap0_Sample_State:
@@ -102,10 +108,6 @@ void StartDetectionTask(void *argument)
 				Motor[3].StepperSpeedTMR = 50 - 7*(Cap_Value_Calibrated[0]-3) ;
 				Follow_state = 3;
 			}
-			//printf("follow:%d\r\n",Follow_state);
-			//printf("Cap_Value_Calibrated[0]:%.2f \r\n",Cap_Value_Calibrated[0]);
-			//osDelay(2);
-
 			break;
 
 		case INITFAILSTATE:

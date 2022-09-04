@@ -8,9 +8,10 @@
 #define Encoder2_0position_number 1000		//编码器2:设定0位编码器的计数值，便于对负数进行计算
 #define Encoder3_0position_number 64535		//编码器2:设定0位编码器的计数值，便于对负数进行计算
 
-//#define CiFenLi  		// 磁分离电机控制，define了后则执行磁分离部分代码
+//#define CiFenLi  		// 磁分离电机控制
 #define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
+//#define WeiLiuKong		// 微流控小5V步进电机
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
@@ -87,14 +88,28 @@ extern struct MotorDefine Motor[10];
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
 #endif
 
+#ifdef WeiLiuKong
+#define Motor2_reset_direction 		Motor2_Dir_Backward()	// 加样针模块42步进电机-X方向
+#define Motor2_Nreset_direction 	Motor2_Dir_Forward()
+#define Motor2_reset_OPTstatus		OPT2_ON()
+#define Motor2_Nreset_OPTstatus		OPT2_OFF()
+#define Motor3_reset_direction 		Motor3_Dir_Forward()	// 加样针模块42步进电机-Z方向
+#define Motor3_Nreset_direction 	Motor3_Dir_Backward()
+#define Motor3_reset_OPTstatus		OPT3_ON()
+#define Motor3_Nreset_OPTstatus		OPT3_OFF()
+#endif
+
 #define Motor4_reset_direction 		Motor4_Dir_Forward()	// 磁分离柱塞泵
 #define Motor4_Nreset_direction 	Motor4_Dir_Backward()
 #define Motor4_reset_OPTstatus		OPT4_OFF()
 #define Motor4_Nreset_OPTstatus		OPT4_ON()
 
+
+
+
 void Motor_Data_Init(void);
 void ALL_Motors_Disable(void);
-uint8_t ALL_Motors_Init(void);
+uint8_t ALL_Motors_Init(uint8_t Motor_Num);
 void print_MotorInformation(struct MotorDefine *a);
 void MotorMove_steps(struct MotorDefine *temp);
 void MotorMove_position(struct MotorDefine *temp  , int32_t targer_position);
@@ -112,10 +127,16 @@ void Motor5_AB(void);
 void Motor5_aB(void);
 void Motor5_ab(void);
 void Motor5_Ab(void);
+void Motor5_Release(void);
 void Motor6_AB(void);
 void Motor6_aB(void);
 void Motor6_ab(void);
 void Motor6_Ab(void);
-
+void Motor6_Release(void);
+void Motor7_AB(void);
+void Motor7_aB(void);
+void Motor7_ab(void);
+void Motor7_Ab(void);
+void Motor7_Release(void);
 
 #endif

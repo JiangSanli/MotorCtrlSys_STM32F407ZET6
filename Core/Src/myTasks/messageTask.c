@@ -23,11 +23,11 @@ void deal_buffer_motorCtrl_data(struct MotorDefine *a)
 {
 	a->MotorNumber = USART5_RX_BUF[1];
 
-	if ( USART5_RX_BUF[3] == 0b10000000 )  // 0x80
+	if ( USART5_RX_BUF[3] & 0b10000000 )  // 0x80
 	{
 		a->MotorDirection = 1 ;
 	}
-	else if (USART5_RX_BUF[3] == 0b01000000)	// 0x40
+	else if (USART5_RX_BUF[3] & 0b01000000)	// 0x40
 	{
 		a->MotorDirection = 0 ;
 	}
@@ -84,11 +84,11 @@ void StartmessageTask(void *argument)
 
 			case 0b10000000: 					// 电机控制-位置模式 ，16进制0x80
 				deal_buffer_motorCtrl_position(&Motor_Temp);
-				if (USART5_RX_BUF[3] == 0b00000001){	// 不带编码器模式
+				if (USART5_RX_BUF[3] & 0b00000001){	// 不带编码器模式
 					MotorMove_position(&Motor_Temp,Motor_Temp.TargetPosition);
 				}
 #ifdef JiaYangZhen_EncoderMode
-				else if (USART5_RX_BUF[3] == 0b00000010){	// 带编码器模式
+				else if (USART5_RX_BUF[3] & 0b00000010){	// 带编码器模式
 					MotorMove_position_Enocder(&Motor_Temp,Motor_Temp.TargetPosition);
 				}
 #endif

@@ -91,7 +91,7 @@ void Motor_Data_Init(void)
 	Motor[4].accelerationRate = 2000;
 	Motor[4].decelerationRate = 1000;
 
-/*  Motor5 : 微流控5V小电机-遥感电机   */
+/*  Motor5 : 微流控5V小电机-摇杆电机,水平圆周运动   */
 	Motor[5].MotorNumber = 5;
 	Motor[5].Status = 0,
 	Motor[5].htim_x = &htim6,
@@ -106,7 +106,7 @@ void Motor_Data_Init(void)
 	Motor[5].accelerationRate = 2000;
 	Motor[5].decelerationRate = 1000;
 
-/*  Motor6 : 微流控5V小电机-旋转电机   */
+/*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动   */
 	Motor[6].MotorNumber = 6;
 	Motor[6].Status = 0,
 	Motor[6].htim_x = &htim7,
@@ -120,7 +120,55 @@ void Motor_Data_Init(void)
 	Motor[6].DesiredSpeedInRads = 10;
 	Motor[6].accelerationRate = 2000;
 	Motor[6].decelerationRate = 1000;
+
+/*  Motor7 : 微流控5V小电机-直线电机，水平横向运动   */
+	Motor[7].MotorNumber = 7;
+	Motor[7].Status = 0,
+	Motor[7].htim_x = &htim12,
+	//机械参数
+	Motor[7].deceleration_ratio = 1;
+	Motor[7].step_angle = 18;
+	Motor[7].mircro_steps = 1;
+	Motor[7].MaxSpeedInRads= 25;
+	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+	Motor[7].StartupSpeedInRads = 1;
+	Motor[7].DesiredSpeedInRads = 8;
+	Motor[7].accelerationRate = 2000;
+	Motor[7].decelerationRate = 1000;
 }
+
+void Motor5_AB(void) // 电机5状态1
+{VM5_IN1_H();	VM5_IN2_L();	VM5_IN3_H()	;	VM5_IN4_L();}
+void Motor5_aB(void) // 电机5状态2
+{VM5_IN1_L();	VM5_IN2_H();	VM5_IN3_H()	;	VM5_IN4_L();}
+void Motor5_ab(void) // 电机5状态3
+{VM5_IN1_L();	VM5_IN2_H();	VM5_IN3_L()	;	VM5_IN4_H();}
+void Motor5_Ab(void) // 电机5状态4
+{VM5_IN1_H();	VM5_IN2_L();	VM5_IN3_L()	;	VM5_IN4_H();}
+void Motor5_Release(void) // 电机5释放锁定
+{VM5_IN1_L();	VM5_IN2_L();	VM5_IN3_L()	;	VM5_IN4_L();}
+
+void Motor6_AB(void) // 电机6状态1
+{VM6_IN1_H();	VM6_IN2_L();	VM6_IN3_H()	;	VM6_IN4_L();}
+void Motor6_aB(void) // 电机6状态2
+{VM6_IN1_L();	VM6_IN2_H();	VM6_IN3_H()	;	VM6_IN4_L();}
+void Motor6_ab(void) // 电机6状态3
+{VM6_IN1_L();	VM6_IN2_H();	VM6_IN3_L()	;	VM6_IN4_H();}
+void Motor6_Ab(void) // 电机6状态4
+{VM6_IN1_H();	VM6_IN2_L();	VM6_IN3_L()	;	VM6_IN4_H();}
+void Motor6_Release(void) // 电机6释放锁定
+{VM6_IN1_L();	VM6_IN2_L();	VM6_IN3_L()	;	VM6_IN4_L();}
+
+void Motor7_AB(void) // 电机6状态1
+{VM7_IN1_H();	VM7_IN2_L();	VM7_IN3_H()	;	VM7_IN4_L();}
+void Motor7_aB(void) // 电机7状态2
+{VM7_IN1_L();	VM7_IN2_H();	VM7_IN3_H()	;	VM7_IN4_L();}
+void Motor7_ab(void) // 电机7状态3
+{VM7_IN1_L();	VM7_IN2_H();	VM7_IN3_L()	;	VM7_IN4_H();}
+void Motor7_Ab(void) // 电机7状态4
+{VM7_IN1_H();	VM7_IN2_L();	VM7_IN3_L()	;	VM7_IN4_H();}
+void Motor7_Release(void) // 电机7释放锁定
+{VM7_IN1_L();	VM7_IN2_L();	VM7_IN3_L()	;	VM7_IN4_L();}
 
 void print_MotorInformation(struct MotorDefine *a)
 {
@@ -153,7 +201,6 @@ void print_MotorInformation(struct MotorDefine *a)
 	printf("********************\r\n");
 }
 
-
 void ALL_Motors_Disable(void)
 {
 	Motor1_Disable();	Motor2_Disable();	Motor3_Disable();	Motor4_Disable();
@@ -164,147 +211,72 @@ void ALL_Motors_Disable(void)
 	VM6_IN1_L();	VM6_IN2_L();	VM6_IN3_L();	VM6_IN4_L();
 	VM7_IN1_L();	VM7_IN2_L();	VM7_IN3_L();	VM7_IN4_L();
 	VM8_IN1_L();	VM8_IN2_L();	VM8_IN3_L();	VM8_IN4_L();
-	//printf("[Warning]All Motors Disabled!\r\n");
 }
 
-#ifdef CiFenLi
-uint8_t ALL_Motors_Init(void)  // 所有电机初始化
+/*** 电机使能和复位找0点初始化，输入参数为8bits，低位为1表示初始化电机1，例如：Motor_Num = 5(00000101),初始化电机1&3 ***/
+uint8_t ALL_Motors_Init(uint8_t Motor_Num)
 {
-	Motor1_Enable();	Motor2_Enable();	Motor3_Enable();	Motor4_Enable();
-	VM5_Enable_A();	VM5_Enable_B();
-	VM6_Enable_A();	VM6_Enable_B();
-	VM7_Enable_A();	VM7_Enable_B();
-	VM8_Enable_A();	VM8_Enable_B();
-	osDelay(200);
-	uint8_t InitState = 11 ;
-	uint8_t ResetResult1 = 0;
-	uint8_t ResetResult2 = 0;
-	uint8_t ResetResult4 = 0;
-	while(1)
-	{
-		switch (InitState)
-		{
-			case 11:
-				ResetResult4 = Motor_Reset(&Motor[4]);
-				osDelay(MotorInitDelay);
-				InitState = 12 ;
-
-			case 12:
-				if (ResetResult4){
-					InitState = 21 ;
-				}
-				else{
-					InitState = INITFAILSTATE ;
-				}
-				osDelay(MotorInitDelay);
-				break ;
-
-			case 21:
-				ResetResult2 = Motor_Reset(&Motor[2]);
-				osDelay(MotorInitDelay);
-				InitState = 22 ;
-
-			case 22:
-				if (ResetResult2){
-					InitState = 31 ;
-				}
-				else{
-					InitState = INITFAILSTATE ;
-				}
-				osDelay(MotorInitDelay);
-				break ;
-
-			case 31:
-				ResetResult1 = Motor_Reset(&Motor[1]);
-				osDelay(MotorInitDelay);
-				InitState = 32 ;
-
-			case 32:
-				if (ResetResult1){
-					InitState = INITPASSSTATE ;
-				}
-				else{
-					InitState = INITFAILSTATE ;
-				}
-				osDelay(MotorInitDelay);
-				break ;
-
-			case INITPASSSTATE:
-				printf("All Motors Initialization Completed!\r\n");
-				return INITPASSSTATE;
-				break ;
-
-			case INITFAILSTATE :
-				printf("[WRONG]All Motors Initialization FAILED! False Code(1-n):%d%d%d\r\n",ResetResult1,ResetResult2,ResetResult4);
-				return INITFAILSTATE;
-				break ;
-
+	uint8_t Motor_Init_Result = 0 ;
+	printf("Reseting Motors:0x%x ...\r\n",Motor_Num);
+	if ( Motor_Num & 0b00000001 ){
+		Motor1_Enable();
+		if ( Motor_Reset(&Motor[1]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00000001 ;
 		}
 	}
-	return INITFAILSTATE;
-}
-#endif
-
-#ifdef JiaYangZhen
-uint8_t ALL_Motors_Init(void)  // 电机初始化，找到0位并把电机位置设为0
-{
-	Motor1_Enable();	Motor2_Enable();	Motor3_Enable();	Motor4_Enable();
-	VM5_Enable_A();	VM5_Enable_B();
-	VM6_Enable_A();	VM6_Enable_B();
-	VM7_Enable_A();	VM7_Enable_B();
-	VM8_Enable_A();	VM8_Enable_B();
-	osDelay(200);
-	uint8_t InitState = 11 ;
-	uint8_t ResetResult2 = 0;
-	uint8_t ResetResult3 = 0;
-	while(1)
-	{
-		switch (InitState)
-		{
-			case 11:
-				ResetResult3 = Motor_Reset(&Motor[3]);
-				osDelay(MotorInitDelay);
-				InitState = 12 ;
-
-			case 12:
-				if (ResetResult3){
-					InitState = 21 ;
-				}
-				else{
-					InitState = INITFAILSTATE ;
-				}
-				osDelay(MotorInitDelay);
-				break ;
-
-			case 21:
-				ResetResult2 = Motor_Reset(&Motor[2]);
-				osDelay(MotorInitDelay);
-				InitState = 22 ;
-
-			case 22:
-				if (ResetResult2){
-					InitState = INITPASSSTATE ;
-				}
-				else{
-					InitState = INITFAILSTATE ;
-				}
-				osDelay(MotorInitDelay);
-				break ;
-
-			case INITPASSSTATE:
-				printf("All Motors Initialization Completed!\r\n");
-				return INITPASSSTATE;
-				break ;
-
-			case INITFAILSTATE :
-				printf("[WRONG]All Motors Initialization FAILED! False Code(1-n):%d%d\r\n",ResetResult2,ResetResult3);
-				return INITFAILSTATE;
-				break ;
-			}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00000010 ){
+		Motor2_Enable();
+		if ( Motor_Reset(&Motor[2]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00000010 ;
 		}
-	return INITFAILSTATE;
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00000100 ){
+		Motor3_Enable();
+		if ( Motor_Reset(&Motor[3]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00000100 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00001000 ){
+		Motor4_Enable();
+		if ( Motor_Reset(&Motor[4]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00001000 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00010000 ){
+		VM5_Enable_A();	VM5_Enable_B();
+		if ( Motor_Reset(&Motor[5]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00010000 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00100000 ){
+		VM6_Enable_A();	VM6_Enable_B();
+		if ( Motor_Reset(&Motor[6]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00100000 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b01000000 ){
+		VM7_Enable_A();	VM7_Enable_B();
+		if ( Motor_Reset(&Motor[7]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b01000000 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b10000000 ){
+		VM8_Enable_A();	VM8_Enable_B();
+		if ( Motor_Reset(&Motor[8]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b10000000 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	printf("Reseting Motors Result:0x%x ...\r\n",Motor_Init_Result);
+	return Motor_Init_Result;
 }
-#endif
 
 uint32_t AccelDecelTimeCompute(uint32_t AccelDecelRate)  //根据输入的加减速率，计算加减速计时器的TMR
 {
@@ -347,6 +319,33 @@ void AccelDecel(uint32_t AccelDecelState,struct MotorDefine *a)
 	}
 }
 
+void Motor_AccelDecel_waveCalculate(struct MotorDefine *a)
+{
+	uint32_t DesiredNumberofSteptoAccel ;
+	uint32_t DesiredNumberofSteptoDecel ;
+	float DesiredAccellTimeInSeconds ;
+	float DesiredDecellTimeInSeconds ;
+
+	a->AccelerationTimeTMR = AccelDecelTimeCompute(a->accelerationRate);
+	a->DecelerationTimeTMR = AccelDecelTimeCompute(a->decelerationRate);
+
+	DesiredAccellTimeInSeconds = ((float)a->DesiredSpeedInHz-a->StartupSpeedInHz) / a->accelerationRate;
+	DesiredDecellTimeInSeconds = ((float)a->DesiredSpeedInHz-a->StartupSpeedInHz) / a->decelerationRate;
+	DesiredNumberofSteptoAccel =  DesiredAccellTimeInSeconds * (a->DesiredSpeedInHz-a->StartupSpeedInHz) /2 + a->StartupSpeedInHz*DesiredAccellTimeInSeconds; //对速度曲线求积分，理论计算完成加速需要的步数
+	DesiredNumberofSteptoDecel =  DesiredDecellTimeInSeconds * (a->DesiredSpeedInHz-a->StartupSpeedInHz) /2 + a->StartupSpeedInHz*DesiredDecellTimeInSeconds ; //对速度曲线求积分，理论计算完成减速需要的步数
+
+	if ( (DesiredNumberofSteptoAccel + DesiredNumberofSteptoDecel) <= a->NumberofSteps ) //如果加减速需要的步数和，小于总步数，则进行完整加减速
+	{
+		a->NumberofSteps_StopAccel = a->NumberofSteps - DesiredNumberofSteptoAccel ;
+		a->NumberofSteps_BeginDecel =  DesiredNumberofSteptoDecel ;
+	}
+	else  // 如果行进距离不能完成完整的加减速曲线，则前1/3加速，后2/3减速
+	{
+		a->NumberofSteps_StopAccel = a->NumberofSteps /3*2 ;
+		a->NumberofSteps_BeginDecel = a->NumberofSteps /3*2 ;
+	}
+}
+
 void MotorDirection_SetUp(struct MotorDefine *a)
 {
 	if (a->MotorNumber == 1){
@@ -381,53 +380,8 @@ void MotorDirection_SetUp(struct MotorDefine *a)
 			Motor4_reset_direction;
 		}
 	}
+
 }
-
-void Motor5_AB(void) // 电机5状态1
-{VM5_IN1_H();	VM5_IN2_L();	VM5_IN3_H()	;	VM5_IN4_L();}
-void Motor5_aB(void) // 电机5状态2
-{VM5_IN1_L();	VM5_IN2_H();	VM5_IN3_H()	;	VM5_IN4_L();}
-void Motor5_ab(void) // 电机6状态3
-{VM5_IN1_L();	VM5_IN2_H();	VM5_IN3_L()	;	VM5_IN4_H();}
-void Motor5_Ab(void) // 电机6状态4
-{VM5_IN1_H();	VM5_IN2_L();	VM5_IN3_L()	;	VM5_IN4_H();}
-
-void Motor6_AB(void) // 电机6状态1
-{VM6_IN1_H();	VM6_IN2_L();	VM6_IN3_H()	;	VM6_IN4_L();}
-void Motor6_aB(void) // 电机6状态2
-{VM6_IN1_L();	VM6_IN2_H();	VM6_IN3_H()	;	VM6_IN4_L();}
-void Motor6_ab(void) // 电机6状态3
-{VM6_IN1_L();	VM6_IN2_H();	VM6_IN3_L()	;	VM6_IN4_H();}
-void Motor6_Ab(void) // 电机6状态4
-{VM6_IN1_H();	VM6_IN2_L();	VM6_IN3_L()	;	VM6_IN4_H();}
-
-void Motor_AccelDecel_waveCalculate(struct MotorDefine *a)
-{
-	uint32_t DesiredNumberofSteptoAccel ;
-	uint32_t DesiredNumberofSteptoDecel ;
-	float DesiredAccellTimeInSeconds ;
-	float DesiredDecellTimeInSeconds ;
-
-	a->AccelerationTimeTMR = AccelDecelTimeCompute(a->accelerationRate);
-	a->DecelerationTimeTMR = AccelDecelTimeCompute(a->decelerationRate);
-
-	DesiredAccellTimeInSeconds = ((float)a->DesiredSpeedInHz-a->StartupSpeedInHz) / a->accelerationRate;
-	DesiredDecellTimeInSeconds = ((float)a->DesiredSpeedInHz-a->StartupSpeedInHz) / a->decelerationRate;
-	DesiredNumberofSteptoAccel =  DesiredAccellTimeInSeconds * (a->DesiredSpeedInHz-a->StartupSpeedInHz) /2 + a->StartupSpeedInHz*DesiredAccellTimeInSeconds; //对速度曲线求积分，理论计算完成加速需要的步数
-	DesiredNumberofSteptoDecel =  DesiredDecellTimeInSeconds * (a->DesiredSpeedInHz-a->StartupSpeedInHz) /2 + a->StartupSpeedInHz*DesiredDecellTimeInSeconds ; //对速度曲线求积分，理论计算完成减速需要的步数
-
-	if ( (DesiredNumberofSteptoAccel + DesiredNumberofSteptoDecel) <= a->NumberofSteps ) //如果加减速需要的步数和，小于总步数，则进行完整加减速
-	{
-		a->NumberofSteps_StopAccel = a->NumberofSteps - DesiredNumberofSteptoAccel ;
-		a->NumberofSteps_BeginDecel =  DesiredNumberofSteptoDecel ;
-	}
-	else  // 如果行进距离不能完成完整的加减速曲线，则前1/3加速，后2/3减速
-	{
-		a->NumberofSteps_StopAccel = a->NumberofSteps /3*2 ;
-		a->NumberofSteps_BeginDecel = a->NumberofSteps /3*2 ;
-	}
-}
-
 
 /*            *****************    0x40-0b01000000 电机参数控制模式 ：  ******************
 根据协议，通过USART5进行出串口通讯，输入步进电机的【编号、方向、速度、距离、启动速度、加减速频率】电机运动参数
@@ -681,7 +635,6 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}
@@ -714,7 +667,6 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}
@@ -747,7 +699,6 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}
@@ -780,11 +731,13 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 				else {HAL_Delay(1);}
 			}
 			Motor[temp->MotorNumber].NumberofSteps = 2;
-			//printf("  Motor%d Reset Completed! Position:%ld\r\n",Motor[temp->MotorNumber].MotorNumber,Motor[temp->MotorNumber].StepPosition);
 			return SUCCESS;
 		}
 	}
-	return SUCCESS;
+
+
+
+	return FAIL;
 }
 
 #ifdef CiFenLi
