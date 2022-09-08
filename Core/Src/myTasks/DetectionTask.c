@@ -23,11 +23,11 @@
 float Cap_Value[2] ;    		// 直接读出并转换的电容值
 float Cap_Value_Calibrated[2] ;	// 校准后的电容值，正常状态下为0
 float Calibration_Value[2] ;	// 校准值，为常规状态下的电容值均值，计算绝对电容值需要减去该值
+
 uint8_t Follow_state ;
-
 uint8_t DetectionTask_STATE ;
-//float Diff_Cap ;
 
+#ifndef DushuModule
 uint8_t init_Calibration_Value(uint8_t index)
 {
 	Calibration_Value[index] = 0;
@@ -45,7 +45,7 @@ uint8_t init_Calibration_Value(uint8_t index)
 		}
 	}
 	Calibration_Value[index] = Calibration_Value[index] / 10 ;
-	printf("init_Calibration_Value Completed! Calibration_Value[%d]:%.2f\r\n",index,Calibration_Value[index]);
+	printf("CapDetect_Calibration_Value Initialization Completed! Calibration_Value[%d]:%.2f\r\n",index,Calibration_Value[index]);
 	return INITPASSSTATE ;
 }
 
@@ -60,10 +60,10 @@ void StartDetectionTask(void *argument)
 	osDelay(50);
 	printf("DetectionTask starts! \r\n");
 
-//	Init_DoubleChannel_FDC2212();
-//	osDelay(100);
-//	DetectionTask_STATE = init_Calibration_Value(0);
-//	osDelay(100);
+	Init_DoubleChannel_FDC2212();
+	osDelay(100);
+	DetectionTask_STATE = init_Calibration_Value(0);
+	osDelay(100);
 	DetectionTask_STATE = INITPASSSTATE ;
 
 	for(;;)
@@ -72,18 +72,7 @@ void StartDetectionTask(void *argument)
 		switch (DetectionTask_STATE)
 		{
 		case INITPASSSTATE:
-			osDelay(10);
-			if(KEY1_Pressed())
-			{
-				osDelay(20);
-				if(KEY1_Pressed())
-				{
-					osDelay(20);
-					while (KEY1_Pressed()){osDelay(1);}
-					DetectionTask_STATE = 10;
-					printf("Key1 pressed!\r\n");
-				}
-			}
+			osDelay(50);
 			break;
 
 		case 10:
@@ -91,6 +80,7 @@ void StartDetectionTask(void *argument)
 			osDelay(100);
 			DetectionTask_STATE = init_Calibration_Value(0);
 			osDelay(300);
+			DetectionTask_STATE = INITPASSSTATE;
 			break;
 
 		case Cap0_Sample_State:
@@ -121,5 +111,110 @@ void StartDetectionTask(void *argument)
 
 }
 
+#else
+
+uint8_t CH297_SampleTime[] = "T1\r\n" ;
+uint8_t CH297_Start[] = "S\r\n" ;
+uint8_t CH297_End[] = "E\r\n" ;
+
+void CH297_Module_Init(void)
+{
+	HAL_UART_Transmit(&huart5, CH297_SampleTime , sizeof(CH297_SampleTime)-1, 1000);
+	osDelay(100);
+	HAL_UART_Transmit(&huart5, CH297_SampleTime , sizeof(CH297_SampleTime)-1, 1000);
+}
+
+void CH297_Module_START(void)
+{
+	HAL_UART_Transmit(&huart5, CH297_Start , sizeof(CH297_End)-1, 1000);
+	osDelay(20);
+	HAL_UART_Transmit(&huart5, CH297_Start , sizeof(CH297_End)-1, 1000);
+}
+
+void CH297_Module_STOP(void)
+{
+	HAL_UART_Transmit(&huart5, CH297_End , sizeof(CH297_End)-1, 1000);
+	osDelay(20);
+	HAL_UART_Transmit(&huart5, CH297_End , sizeof(CH297_End)-1, 1000);
+}
+
+void StartDetectionTask(void *argument)
+{
+	osDelay(50);
+	printf("DetectionTask starts! \r\n");
+	osDelay(300);
+	CH297_Module_STOP();
+	osDelay(100);
+	CH297_Module_Init();
+	osDelay(100);
+	DetectionTask_STATE = INITPASSSTATE ;
+
+	for(;;)
+	{
+		osDelay(1);
+		switch (DetectionTask_STATE)
+		{
+		case INITPASSSTATE:
+			osDelay(10);
+			if(KEY0_Pressed())
+			{
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					DetectionTask_STATE = 10;
+					printf("Key0 pressed!\r\n");
+				}
+			}
+			if(KEY1_Pressed())
+			{
+				osDelay(20);
+				if(KEY1_Pressed())
+				{
+					osDelay(20);
+					while (KEY1_Pressed()){osDelay(1);}
+					DetectionTask_STATE = 20;
+					printf("Key1 pressed!\r\n");
+				}
+			}
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					DetectionTask_STATE = 30;
+					printf("Key2 pressed!\r\n");
+				}
+			}
+			break;
+
+		case 10:
+			CH297_Module_START();
+			DetectionTask_STATE = INITPASSSTATE;
+			break;
+
+		case 20:
+			CH297_Module_Init();
+			DetectionTask_STATE = INITPASSSTATE;
+			break;
+
+		case 30:
+			CH297_Module_STOP();
+			DetectionTask_STATE = INITPASSSTATE;
+			break;
+
+		case INITFAILSTATE:
+			printf("[WRONG]init_Calibration_Value FAILED,reCalibrating...\r\n");
+			osDelay(3000);
+
+		}
+
+	}
+
+}
+#endif
 
 

@@ -9,9 +9,10 @@
 #define Encoder3_0position_number 64535		//编码器2:设定0位编码器的计数值，便于对负数进行计算
 
 //#define CiFenLi  		// 磁分离电机控制
-#define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
+//#define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
 //#define WeiLiuKong		// 微流控小5V步进电机
+#define DushuModule
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
@@ -75,9 +76,7 @@ extern struct MotorDefine Motor[10];
 #define Motor3_Nreset_direction 	Motor3_Dir_Backward()
 #define Motor3_reset_OPTstatus		OPT3_ON()
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
-#endif
-
-#ifdef JiaYangZhen
+#else
 #define Motor2_reset_direction 		Motor2_Dir_Backward()	// 加样针模块42步进电机-X方向
 #define Motor2_Nreset_direction 	Motor2_Dir_Forward()
 #define Motor2_reset_OPTstatus		OPT2_ON()
@@ -88,28 +87,23 @@ extern struct MotorDefine Motor[10];
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
 #endif
 
-#ifdef WeiLiuKong
-#define Motor2_reset_direction 		Motor2_Dir_Backward()	// 加样针模块42步进电机-X方向
-#define Motor2_Nreset_direction 	Motor2_Dir_Forward()
-#define Motor2_reset_OPTstatus		OPT2_ON()
-#define Motor2_Nreset_OPTstatus		OPT2_OFF()
-#define Motor3_reset_direction 		Motor3_Dir_Forward()	// 加样针模块42步进电机-Z方向
-#define Motor3_Nreset_direction 	Motor3_Dir_Backward()
-#define Motor3_reset_OPTstatus		OPT3_ON()
-#define Motor3_Nreset_OPTstatus		OPT3_OFF()
-#endif
-
-#define Motor4_reset_direction 		Motor4_Dir_Forward()	// 磁分离柱塞泵
+#define Motor4_reset_direction 		Motor4_Dir_Forward()	// 磁分离&加样针柱塞泵
 #define Motor4_Nreset_direction 	Motor4_Dir_Backward()
 #define Motor4_reset_OPTstatus		OPT4_OFF()
 #define Motor4_Nreset_OPTstatus		OPT4_ON()
 
 
+#define Motor5_reset_OPTstatus		OPT9_OFF()
+#define Motor5_Nreset_OPTstatus		OPT9_ON()
+
+#define Motor6_reset_OPTstatus		OPT10_ON()
+#define Motor6_Nreset_OPTstatus		OPT10_OFF()
 
 
 void Motor_Data_Init(void);
 void ALL_Motors_Disable(void);
 uint8_t ALL_Motors_Init(uint8_t Motor_Num);
+void AccelDecel(uint32_t AccelDecelState,struct MotorDefine *a);
 void print_MotorInformation(struct MotorDefine *a);
 void MotorMove_steps(struct MotorDefine *temp);
 void MotorMove_position(struct MotorDefine *temp  , int32_t targer_position);
@@ -117,11 +111,10 @@ void MotorMove_position_Enocder(struct MotorDefine *temp  , int32_t targer_posit
 uint8_t Motor_Reset(struct MotorDefine *temp);
 uint8_t Motor4_SuckInMode(uint32_t x_uL);
 uint8_t Motor4_PushOutMode(uint32_t x_uL);
-void Motor5_SuckOut_ON(void);
-void Motor5_SuckOut_OFF(void);
-void AccelDecel(uint32_t AccelDecelState,struct MotorDefine *a);
-void DC_Motor_Move(void);
-void DC_Motor_Stop(void);
+void DC_Motor6A_ON(void);
+void DC_Motor6A_OFF(void);
+void DC_Motor7A_ON(void);
+void DC_Motor7A_OFF(void);
 
 void Motor5_AB(void);
 void Motor5_aB(void);

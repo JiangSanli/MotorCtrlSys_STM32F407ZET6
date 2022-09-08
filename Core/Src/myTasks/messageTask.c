@@ -17,6 +17,8 @@
 #include "stdio.h"
 #include "MotorCtrl.h"
 
+
+#ifndef DushuModule
 struct MotorDefine Motor_Temp ;
 
 void deal_buffer_motorCtrl_data(struct MotorDefine *a)
@@ -118,5 +120,30 @@ void StartmessageTask(void *argument)
 		}
 	}
 }
+#else
+
+void StartmessageTask(void *argument)
+{
+	osDelay(20);
+	uint32_t med32;
+	printf("messageTask starts! \r\n");
+
+	for(;;)
+	{
+		osDelay(1);
+
+	    if(USART_RX_STA&0x8000)
+		{
+	    	 med32 = ((USART5_RX_BUF[1] << 24) | (USART5_RX_BUF[2] << 16) | (USART5_RX_BUF[3] << 8) | (USART5_RX_BUF[4]));
+	    	 printf("%ld\r\n", med32);
+
+	    	//printf("%x %x %x %x %x %x \r\n",USART5_RX_BUF[0],USART5_RX_BUF[1],USART5_RX_BUF[2],USART5_RX_BUF[3],USART5_RX_BUF[4],USART5_RX_BUF[5]);
+	    	USART_RX_STA=0;
+		}
+	}
+}
+
+#endif
+
 
 

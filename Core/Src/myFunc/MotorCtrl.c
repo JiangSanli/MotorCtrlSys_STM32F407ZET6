@@ -706,7 +706,8 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 	if (temp->MotorNumber == 4){
 		if ( Motor4_reset_OPTstatus ){
 			temp->MotorDirection = 1 ;
-			MotorRun_LowSpeed(temp);
+			temp->NumberofRads = 10 ;
+			MotorMove_steps(temp);
 			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor4_reset_OPTstatus ; i++){
 				if(i>500) {
@@ -721,8 +722,75 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 		HAL_Delay(MotorResetDelay);
 		if (Motor4_Nreset_OPTstatus){
 			temp->MotorDirection = 0 ;
-			MotorRun_LowSpeed(temp);
+			temp->NumberofRads = 10 ;
+			MotorMove_steps(temp);
 			for(uint32_t i=0 ; Motor4_Nreset_OPTstatus ; i++){
+				if(i>8000) {
+					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					Motor[temp->MotorNumber].NumberofSteps = 2;
+					return FAIL;
+				}
+				else {HAL_Delay(1);}
+			}
+			Motor[temp->MotorNumber].NumberofSteps = 2;
+			return SUCCESS;
+		}
+	}
+
+	if (temp->MotorNumber == 5){
+		if ( Motor5_reset_OPTstatus ){
+			temp->MotorDirection = 1 ;
+			MotorRun_LowSpeed(temp);
+			HAL_Delay(MotorResetDelay);
+			for(uint32_t i=0 ; Motor5_reset_OPTstatus ; i++){
+				if(i>500) {
+					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					Motor[temp->MotorNumber].NumberofSteps = 2;
+					return FAIL;
+				}
+				else {HAL_Delay(1);}
+			}
+			Motor[temp->MotorNumber].NumberofSteps = 2;
+		}
+		HAL_Delay(MotorResetDelay);
+		if (Motor5_Nreset_OPTstatus){
+			temp->MotorDirection = 0 ;
+			MotorRun_LowSpeed(temp);
+			for(uint32_t i=0 ; Motor5_Nreset_OPTstatus ; i++){
+				if(i>1000) {
+					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					Motor[temp->MotorNumber].NumberofSteps = 2;
+					return FAIL;
+				}
+				else {HAL_Delay(1);}
+			}
+			Motor[temp->MotorNumber].NumberofSteps = 2;
+			return SUCCESS;
+		}
+	}
+
+	if (temp->MotorNumber == 6){
+		if ( Motor6_reset_OPTstatus ){
+			temp->MotorDirection = 1 ;
+			temp->NumberofRads = 10 ;
+			MotorMove_steps(temp);
+			HAL_Delay(MotorResetDelay);
+			for(uint32_t i=0 ; Motor6_reset_OPTstatus ; i++){
+				if(i>500) {
+					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					Motor[temp->MotorNumber].NumberofSteps = 2;
+					return FAIL;
+				}
+				else {HAL_Delay(1);}
+			}
+			Motor[temp->MotorNumber].NumberofSteps = 2;
+		}
+		HAL_Delay(MotorResetDelay);
+		if (Motor6_Nreset_OPTstatus){
+			temp->MotorDirection = 0 ;
+			temp->NumberofRads = 50 ;
+			MotorMove_steps(temp);
+			for(uint32_t i=0 ; Motor6_Nreset_OPTstatus ; i++){
 				if(i>5000) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
@@ -736,16 +804,19 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 	}
 
 
-
 	return FAIL;
 }
 
-#ifdef CiFenLi
 uint8_t Motor4_SuckInMode(uint32_t x_uL)  // 电机4最大排量1000uL，总行程10rads（2000步），每步0.5uL
 {
+#ifdef JiaYangZhen
+	OUT5_OFF();
+#endif
+#ifdef CiFenLi
 	OUT5_ON();
 	OUT6_OFF();
-	osDelay(20);
+#endif
+	osDelay(50);
 	printf("Motor4_Sucks in %lduL...\r\n", x_uL);
 	int32_t target_steps = x_uL * 2 * Motor[4].mircro_steps ;
 	while(Motor[4].Status == 1){osDelay(1);}
@@ -753,19 +824,26 @@ uint8_t Motor4_SuckInMode(uint32_t x_uL)  // 电机4最大排量1000uL，总行�
 	while(Motor[4].Status == 1){osDelay(1);}
 	MotorMove_position(&Motor[4], target_steps );
 	while(Motor[4].Status == 1){osDelay(1);}
-	osDelay(20);
+	osDelay(50);
+#ifdef CiFenLi
 	OUT5_OFF();
 	OUT6_OFF();
+#endif
 	return SUCCESS;
 }
 
 uint8_t Motor4_PushOutMode(uint32_t x_uL)
 {
+#ifdef JiaYangZhen
+	OUT5_OFF();
+#endif
+#ifdef CiFenLi
 	OUT5_OFF();
 	OUT6_ON();
+#endif
 	osDelay(50);
 	printf("Motor4_Pushs out uL...\r\n");
-	int32_t target_position = Motor[4].StepPosition -(x_uL * 2 * Motor[4].mircro_steps) ;
+	int32_t target_position = Motor[4].StepPosition - (x_uL * 2 * Motor[4].mircro_steps) ;
 	if(target_position < 0){
 		printf("[WRONG]Push out Number Overflow!\r\n Maximum Number:%ld uL\r\n",Motor[4].StepPosition/Motor[4].mircro_steps/2);
 		return FAIL;
@@ -774,38 +852,47 @@ uint8_t Motor4_PushOutMode(uint32_t x_uL)
 	MotorMove_position(&Motor[4], target_position );
 	while(Motor[4].Status == 1){osDelay(1);}
 	osDelay(50);
+#ifdef CiFenLi
 	OUT5_OFF();
 	OUT6_OFF();
+#endif
 	return SUCCESS;
 }
 
-void Motor5_SuckOut_ON(void)
+void DC_Motor7A_ON(void)
 {
-	OUT4_ON();
+	VM7_Enable_A();
 	osDelay(10);
-	VM8_IN1_H();
-	VM8_IN2_L();
+	OUT4_ON();
+	osDelay(50);
+	VM7_IN1_H();
+	VM7_IN2_L();
 }
 
-void Motor5_SuckOut_OFF(void)
+void DC_Motor7A_OFF(void)
 {
-	VM8_IN1_L();
-	VM8_IN2_L();
+	VM7_Disable_A();
 	osDelay(10);
+	VM7_IN1_L();
+	VM7_IN2_L();
+	osDelay(50);
 	OUT4_OFF();
 }
 
-
-void DC_Motor_Move(void)
+void DC_Motor6A_ON(void)
 {
+	VM6_Enable_A();
+	osDelay(10);
 	VM6_IN1_H();
 	VM6_IN2_L();
 }
 
-void DC_Motor_Stop(void)
+void DC_Motor6A_OFF(void)
 {
+	VM6_Disable_A();
+	osDelay(10);
 	VM6_IN1_L();
 	VM6_IN2_L();
 }
-#endif
+
 

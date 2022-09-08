@@ -241,7 +241,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		uart_reieve_timeoutCount++;
 		if((USART_RX_STA&0x8000)==0)  // 如果未收到接收完成标志，判断时间是否超过300ms
 		{
-			  if(uart_reieve_timeoutCount > 300) //串口接收触发后开启TIM7，如果接收时间大大于300ms,判断为超时并清除缓存
+			  if(uart_reieve_timeoutCount > 3000) //串口接收触发后开启TIM7，如果接收时间大大于300ms,判断为超时并清除缓存
 			  {
 				  printf("\r\n[WRONG] Data Input Illegal !\r\n");
 				  uart_reieve_timeoutCount = 0;

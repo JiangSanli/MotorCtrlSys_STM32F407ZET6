@@ -253,6 +253,9 @@ void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 }
 
 /* USER CODE BEGIN 2 */
@@ -280,8 +283,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	else {
         		;
         	}
-        	break
-#else
+        	break;
+#endif
+#ifdef JiaYangZhen
         case OPT_IN2_Pin:
         	if (OPT_IN2_GPIO_Port->IDR & OPT_IN2_Pin) { 	// if Rising edge trigger
         		;
@@ -322,8 +326,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	}
             break;
 
-        case OPT_IN5_Pin:
-        	if (OPT_IN5_GPIO_Port->IDR & OPT_IN5_Pin) { 	// if Rising edge trigger
+        // 微流控5V小电机
+        case OPT_IN9_Pin:
+        	if (OPT_IN9_GPIO_Port->IDR & OPT_IN9_Pin) { 	// if Rising edge trigger
         		Motor[5].StepPosition =0 ;
         	}
         	else {
@@ -331,8 +336,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	}
             break;
 
-        case OPT_IN6_Pin:
-        	if (OPT_IN6_GPIO_Port->IDR & OPT_IN6_Pin) { 	// if Rising edge trigger
+        case OPT_IN10_Pin:
+        	if (OPT_IN10_GPIO_Port->IDR & OPT_IN10_Pin) { 	// if Rising edge trigger
         		 ;
         	}
         	else {
@@ -340,8 +345,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	}
             break;
 
-        case OPT_IN7_Pin:
-        	if (OPT_IN7_GPIO_Port->IDR & OPT_IN7_Pin) { 	// if Rising edge trigger
+        case OPT_IN11_Pin:
+        	if (OPT_IN11_GPIO_Port->IDR & OPT_IN11_Pin) { 	// if Rising edge trigger
         		Motor[7].StepPosition =0 ;
         	}
         	else {
