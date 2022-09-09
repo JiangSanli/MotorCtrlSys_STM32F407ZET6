@@ -43,7 +43,7 @@ struct MotorDefine {
 	uint32_t StartupSpeedInHz;			// 计算电机初始和减速结束的工作频率
 	uint32_t ActualSpeedInHz;			// 计算输出的实际频率
 	uint32_t DesiredSpeedInHz;			// 计算需要达到的目标速度
-	uint32_t StepperSpeedTMR;			// 根据计时器中断频率1M/(49+1)，计算PWM频率，实际为中断计数
+	uint32_t StepperSpeedTMR;			// 根据计时器中断频率100KHz，计算PWM频率，实际为中断计数
 	uint32_t NumberofSteps;				// 计算电机需要走的步数
 	uint32_t NumberofSteps_StopAccel;	// 计算电机停止加速的步数值
 	uint32_t NumberofSteps_BeginDecel;	// 计算电机开始减速的步数值
@@ -111,10 +111,12 @@ void MotorMove_position_Enocder(struct MotorDefine *temp  , int32_t targer_posit
 uint8_t Motor_Reset(struct MotorDefine *temp);
 uint8_t Motor4_SuckInMode(uint32_t x_uL);
 uint8_t Motor4_PushOutMode(uint32_t x_uL);
-void DC_Motor6A_ON(void);
-void DC_Motor6A_OFF(void);
-void DC_Motor7A_ON(void);
-void DC_Motor7A_OFF(void);
+void DC_Motor_ON(struct MotorDefine *temp ,char x, uint32_t Duty_Cycle);
+void DC_Motor_OFF(struct MotorDefine *temp ,char x);
+//void DC_Motor6A_ON(void);
+//void DC_Motor6A_OFF(void);
+//void DC_Motor7A_ON(void);
+//void DC_Motor7A_OFF(void);
 
 void Motor5_AB(void);
 void Motor5_aB(void);

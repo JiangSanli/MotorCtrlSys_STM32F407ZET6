@@ -128,14 +128,12 @@ void CH297_Module_START(void)
 {
 	HAL_UART_Transmit(&huart5, CH297_Start , sizeof(CH297_End)-1, 1000);
 	osDelay(20);
-	HAL_UART_Transmit(&huart5, CH297_Start , sizeof(CH297_End)-1, 1000);
 }
 
 void CH297_Module_STOP(void)
 {
 	HAL_UART_Transmit(&huart5, CH297_End , sizeof(CH297_End)-1, 1000);
-	osDelay(20);
-	HAL_UART_Transmit(&huart5, CH297_End , sizeof(CH297_End)-1, 1000);
+	osDelay(500);
 }
 
 void StartDetectionTask(void *argument)
@@ -143,6 +141,8 @@ void StartDetectionTask(void *argument)
 	osDelay(50);
 	printf("DetectionTask starts! \r\n");
 	osDelay(300);
+	CH297_Module_STOP();
+	osDelay(100);
 	CH297_Module_STOP();
 	osDelay(100);
 	CH297_Module_Init();
@@ -155,40 +155,7 @@ void StartDetectionTask(void *argument)
 		switch (DetectionTask_STATE)
 		{
 		case INITPASSSTATE:
-			osDelay(10);
-			if(KEY0_Pressed())
-			{
-				osDelay(20);
-				if(KEY0_Pressed())
-				{
-					osDelay(20);
-					while (KEY0_Pressed()){osDelay(1);}
-					DetectionTask_STATE = 10;
-					printf("Key0 pressed!\r\n");
-				}
-			}
-			if(KEY1_Pressed())
-			{
-				osDelay(20);
-				if(KEY1_Pressed())
-				{
-					osDelay(20);
-					while (KEY1_Pressed()){osDelay(1);}
-					DetectionTask_STATE = 20;
-					printf("Key1 pressed!\r\n");
-				}
-			}
-			if(KEY2_Pressed())
-			{
-				osDelay(20);
-				if(KEY2_Pressed())
-				{
-					osDelay(20);
-					while (KEY2_Pressed()){osDelay(1);}
-					DetectionTask_STATE = 30;
-					printf("Key2 pressed!\r\n");
-				}
-			}
+			osDelay(100);
 			break;
 
 		case 10:
@@ -197,7 +164,7 @@ void StartDetectionTask(void *argument)
 			break;
 
 		case 20:
-			CH297_Module_Init();
+			printf("-1\n");
 			DetectionTask_STATE = INITPASSSTATE;
 			break;
 

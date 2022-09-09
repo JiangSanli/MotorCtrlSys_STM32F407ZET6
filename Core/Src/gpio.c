@@ -326,7 +326,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	}
             break;
 
-        // 微流控5V小电机
+        // 微流�?5V小电�?
         case OPT_IN9_Pin:
         	if (OPT_IN9_GPIO_Port->IDR & OPT_IN9_Pin) { 	// if Rising edge trigger
         		Motor[5].StepPosition =0 ;

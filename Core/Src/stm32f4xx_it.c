@@ -411,20 +411,21 @@ void UART5_IRQHandler(void)
   HAL_UART_IRQHandler(&huart5);
   /* USER CODE BEGIN UART5_IRQn 1 */
 
-  uint32_t timeout=0;
-  timeout=0;
-  while (HAL_UART_GetState(&huart5) != HAL_UART_STATE_READY)
-  {
-	  timeout++;		//超时处理
-	  if(timeout>HAL_MAX_DELAY) break;
-  }
-
-  timeout=0;
-  while(HAL_UART_Receive_IT(&huart5, (uint8_t *)aRxBuffer, 1) != HAL_OK)	//每次中断处理完成之后，重新开启中断并设置RxXferCount 1
-  {
-	 timeout++; 	//超时处理
-	 if(timeout>HAL_MAX_DELAY) break;
-  }
+//  uint32_t timeout=0;
+//  timeout=0;
+//  while (HAL_UART_GetState(&huart5) != HAL_UART_STATE_READY)
+//  {
+//	  timeout++;		//超时处理
+//	  if(timeout>HAL_MAX_DELAY) break;
+//  }
+//
+//  timeout=0;
+//  while(HAL_UART_Receive_IT(&huart5, (uint8_t *)aRxBuffer, 1) != HAL_OK)	//每次中断处理完成之后，重新开启中断并设置RxXferCount 1
+//  {
+//	 timeout++; 	//超时处理
+//	 if(timeout>HAL_MAX_DELAY) break;
+//  }
+  	HAL_UART_Receive_IT(&huart5, (uint8_t *)aRxBuffer, 1);
 
   /* USER CODE END UART5_IRQn 1 */
 }

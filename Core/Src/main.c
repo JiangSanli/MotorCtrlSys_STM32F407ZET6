@@ -204,8 +204,10 @@ uint32_t AccelDecelcount_TIM10 = 0;
 uint32_t timecount_TIM11 = 0;
 uint32_t AccelDecelcount_TIM11 = 0;
 uint32_t timecount_TIM12 = 0;
-uint8_t  Motor7_State = 1 ;
 uint32_t AccelDecelcount_TIM12 = 0;
+uint32_t timecount_TIM12_DCM7 = 0 ;
+uint32_t timecount_TIM12_DCM6 = 0 ;
+uint8_t  Motor7_State = 1 ;
 uint32_t timecount_TIM13 = 0;
 uint32_t AccelDecelcount_TIM13 = 0;
 uint32_t timecount_TIM14 = 0;
@@ -239,23 +241,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 	if (htim->Instance == TIM9) {
 		uart_reieve_timeoutCount++;
-		if((USART_RX_STA&0x8000)==0)  // 如果未收到接收完成标志，判断时间是否超过300ms
-		{
-			  if(uart_reieve_timeoutCount > 3000) //串口接收触发后开启TIM7，如果接收时间大大于300ms,判断为超时并清除缓存
-			  {
-				  printf("\r\n[WRONG] Data Input Illegal !\r\n");
-				  uart_reieve_timeoutCount = 0;
-				  USART_RX_STA = 0;
-				  memset(USART5_RX_BUF,0,100);   // 清空缓存
-				  HAL_TIM_Base_Stop_IT(&htim9);
-			  }
-		}
-		else
+		if( USART_RX_STA&0x8000 )   // 如果未收到接收完成标志，判断是否超时
 		{
 			uart_reieve_timeoutCount = 0;
 			HAL_TIM_Base_Stop_IT(&htim9);
 		}
-
+		else
+		{
+			if(uart_reieve_timeoutCount > 100)
+			{
+				printf("\r\n[WRONG] Data Input Illegal !\r\n");
+				uart_reieve_timeoutCount = 0;
+				USART_RX_STA = 0;
+				//memset(USART5_RX_BUF,0,100);   // 清空缓存
+				HAL_TIM_Base_Stop_IT(&htim9);
+			}
+		}
 	}
 
 	if (htim->Instance == TIM10)
@@ -691,6 +692,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 	}
 
+#ifdef WeiLiuKong
 	else if (htim->Instance == TIM12)
 	{
 			timecount_TIM12++;
@@ -777,6 +779,88 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 			}
 	}
+#endif
+
+#ifdef CiFenLi
+	else if (htim->Instance == TIM12)
+	{
+			timecount_TIM12_DCM7++;
+			timecount_TIM12_DCM6++;
+			if (Motor[7].Status){
+				if(timecount_TIM12_DCM7 <= Motor[7].AccelerationTimeTMR)
+				{
+					switch( Motor[7].Status ){
+					case 0b00000010:
+						VM7_IN1_H();
+						break;
+					case 0b00000001:
+						VM7_IN4_H();
+						break;
+					case 0b00000011:
+						VM7_IN1_H();
+						VM7_IN4_H();
+						break;
+					}
+				}
+				else if(timecount_TIM12_DCM7 > Motor[7].AccelerationTimeTMR)
+				{
+					switch( Motor[7].Status ){
+					case 0b00000010:
+						VM7_IN1_L();
+						break;
+					case 0b00000001:
+						VM7_IN4_L();
+						break;
+					case 0b00000011:
+						VM7_IN1_L();
+						VM7_IN4_L();
+						break;
+					}
+				}
+				if(timecount_TIM12_DCM7 >= Motor[7].StepperSpeedTMR)
+				{
+					timecount_TIM12_DCM7 = 0 ;
+				}
+			}
+
+			if (Motor[6].Status){
+				if(timecount_TIM12_DCM6 <= Motor[6].AccelerationTimeTMR)
+				{
+					switch( Motor[6].Status ){
+					case 0b00000010:
+						VM6_IN1_H();
+						break;
+					case 0b00000001:
+						VM6_IN4_H();
+						break;
+					case 0b00000011:
+						VM6_IN1_H();
+						VM6_IN4_H();
+						break;
+					}
+				}
+				else if(timecount_TIM12_DCM6 > Motor[6].AccelerationTimeTMR)
+				{
+					switch( Motor[6].Status ){
+					case 0b00000010:
+						VM6_IN1_L();
+						break;
+					case 0b00000001:
+						VM6_IN4_L();
+						break;
+					case 0b00000011:
+						VM6_IN1_L();
+						VM6_IN4_L();
+						break;
+					}
+				}
+				if(timecount_TIM12_DCM6 >= Motor[6].StepperSpeedTMR)
+				{
+					timecount_TIM12_DCM6 = 0 ;
+				}
+			}
+	}
+#endif
 
   /* USER CODE END Callback 1 */
 }

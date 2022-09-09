@@ -25,8 +25,8 @@
 #include "tim.h"
 
 uint8_t aRxBuffer[1];  // HAL库使用的串口接收缓冲
-uint8_t USART5_RX_BUF[100];	//接收缓冲，最大接收100字节
-uint16_t USART_RX_STA = 0;       //接收状态标志
+uint8_t USART5_RX_BUF[100];	//接收缓冲，最大接�?100字节
+uint16_t USART_RX_STA = 0;       //接收状�?�标�?
 //bit15			接收完成标志 0x55
 //bit14			接收起始标志 0xAA
 //bit13~bit0	接收到的有效字节数目
@@ -363,6 +363,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
 #ifndef DushuModule
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -413,7 +414,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					USART_RX_STA|=0x4000;
 					USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
 					USART_RX_STA++;
-					HAL_TIM_Base_Start_IT(&htim9);
+					//HAL_TIM_Base_Start_IT(&htim9);
 				}
 				else
 				{
@@ -428,9 +429,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				}
 			}
 		}
+		else{
+			USART_RX_STA=0;
+		}
 
 	}
 
 }
 #endif
+
 /* USER CODE END 1 */

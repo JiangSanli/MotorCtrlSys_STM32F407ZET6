@@ -17,7 +17,6 @@
 #include "stdio.h"
 #include "MotorCtrl.h"
 
-
 #ifndef DushuModule
 struct MotorDefine Motor_Temp ;
 
@@ -65,6 +64,13 @@ void deal_buffer_motorCtrl_reset(struct MotorDefine *a)
 	printf("\r\nInput Information: Reset Motor%d\r\n",a->MotorNumber);
 }
 
+void deal_buffer_DCmotorCtrl(struct MotorDefine *a)
+{
+	a->MotorNumber = USART5_RX_BUF[1];
+	a->NumberofSteps_StopAccel = USART5_RX_BUF[6];
+	printf("\r\nInput Information: DC Motor%d Run,Duty Cycle: %ld percent\r\n",a->MotorNumber,a->NumberofSteps_StopAccel);
+}
+
 void StartmessageTask(void *argument)
 {
 	osDelay(20);
@@ -109,6 +115,27 @@ void StartmessageTask(void *argument)
 				USART_RX_STA=0;
 			break;
 
+			case 0b00010000:  					// 直流电机控制 0x10
+				deal_buffer_DCmotorCtrl(&Motor_Temp);
+				if (USART5_RX_BUF[4] == 0x00 ){
+					if( USART5_RX_BUF[5] == 0x02 ){
+						DC_Motor_OFF(&Motor_Temp,'A');
+					}
+					else if( USART5_RX_BUF[5] == 0x01 ){
+						DC_Motor_OFF(&Motor_Temp,'B');
+					}
+				}
+				else{
+					if( USART5_RX_BUF[5] == 0x02 ){
+						DC_Motor_ON(&Motor_Temp,'A',USART5_RX_BUF[6]);
+					}
+					else if( USART5_RX_BUF[5] == 0x01 ){
+						DC_Motor_ON(&Motor_Temp,'B',USART5_RX_BUF[6]);
+					}
+				}
+				USART_RX_STA=0;
+			break;
+
 			case 0b00000001: 					// 打印回传接收到的协议数据 ， 16进制0x01
 				HAL_UART_Transmit_IT(&huart5, USART5_RX_BUF,len);
 				while(__HAL_UART_GET_FLAG(&huart5,UART_FLAG_TC)!=SET);
@@ -120,29 +147,26 @@ void StartmessageTask(void *argument)
 		}
 	}
 }
-#else
 
+#else
 void StartmessageTask(void *argument)
 {
 	osDelay(20);
-	uint32_t med32;
+	uint32_t med32 = 0;
 	printf("messageTask starts! \r\n");
 
 	for(;;)
 	{
 		osDelay(1);
-
 	    if(USART_RX_STA&0x8000)
 		{
-	    	 med32 = ((USART5_RX_BUF[1] << 24) | (USART5_RX_BUF[2] << 16) | (USART5_RX_BUF[3] << 8) | (USART5_RX_BUF[4]));
-	    	 printf("%ld\r\n", med32);
-
-	    	//printf("%x %x %x %x %x %x \r\n",USART5_RX_BUF[0],USART5_RX_BUF[1],USART5_RX_BUF[2],USART5_RX_BUF[3],USART5_RX_BUF[4],USART5_RX_BUF[5]);
+	    	med32 = ((USART5_RX_BUF[1] << 24) | (USART5_RX_BUF[2] << 16) | (USART5_RX_BUF[3] << 8) | (USART5_RX_BUF[4]));
 	    	USART_RX_STA=0;
+	    	printf("%ld\n", med32);
 		}
+
 	}
 }
-
 #endif
 
 

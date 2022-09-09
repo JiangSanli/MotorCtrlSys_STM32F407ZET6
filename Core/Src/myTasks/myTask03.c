@@ -31,8 +31,10 @@ void StartTask03(void *argument)
 	printf("myTask03 starts! \r\n");
 
 	Motor_Data_Init();
+	Turntable_Position_Init();
 	osDelay(100);
 	if ( 0b00001011 == ALL_Motors_Init(0b00001011) ){
+		printf("Motors Initialization Completed! \r\n");
 		myTask03_Status = INITPASSSTATE;
 	}
 	else{
@@ -52,7 +54,7 @@ void StartTask03(void *argument)
 			osDelay(10);
 			MotorMove_position(&Motor[1],TPMark[9]) ;
 			osDelay(2000);
-			printf("Please Put Bottle IN!^^^^^^THEN press KEY0\r\n");
+			printf("Please Put Bottle IN!--->THEN press KEY0\r\n");
 			if (Motor[1].Status == 0){myTask03_Status=1;}
 			break;
 
@@ -90,9 +92,9 @@ void StartTask03(void *argument)
 			break;
 
 		case 5:
-			DC_Motor6A_ON() ;
+			DC_Motor_ON(&Motor[6],'A',95);
 			osDelay(2000);
-			DC_Motor6A_OFF() ;
+			DC_Motor_OFF(&Motor[6],'A');
 			osDelay(1000);
 			myTask03_Status = 6;
 			break;
@@ -116,15 +118,19 @@ void StartTask03(void *argument)
 			break;
 
 		case 9:
-			DC_Motor7A_ON();
+			OUT4_ON();
+			osDelay(50);
+			DC_Motor_ON(&Motor[7],'A',40);
 			MotorMove_position(&Motor[2],7000) ;
 			osDelay(2000);
 			if (Motor[2].Status == 0){myTask03_Status=10;}
 			break;
 
 		case 10:
-			DC_Motor7A_OFF();
-			MotorMove_position(&Motor[2],0) ;
+			DC_Motor_OFF(&Motor[7],'A');
+			osDelay(50);
+			OUT4_OFF();
+			MotorMove_position(&Motor[2],-20) ;
 			osDelay(CiFenLi_KeepStatic_time);
 			if (Motor[2].Status == 0){myTask03_Status=0;}
 			break;
@@ -403,7 +409,16 @@ void StartTask03(void *argument)
 	osDelay(10);
 	uint8_t myTask03_Status ;
 	printf("myTask03 starts! \r\n");
-	myTask03_Status = INITPASSSTATE ;
+
+	Motor_Data_Init();
+	osDelay(100);
+	if ( 0b00001000 == ALL_Motors_Init(0b00001000) ){
+		printf("Motors Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
 
 	for(;;)
 	{
@@ -411,8 +426,59 @@ void StartTask03(void *argument)
 		switch (myTask03_Status)
 		{
 		case INITPASSSTATE:
-			osDelay(100);
+			osDelay(10);
+			if(KEY0_Pressed())
+			{
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					myTask03_Status = 10;
+				}
+			}
+			if(KEY1_Pressed())
+			{
+				osDelay(20);
+				if(KEY1_Pressed())
+				{
+					osDelay(20);
+					while (KEY1_Pressed()){osDelay(1);}
+					myTask03_Status = 20;
+				}
+			}
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 30;
+				}
+			}
+			break;
 
+		case 10:
+			if (Motor[4].Status == 0){
+				Motor4_SuckInMode(500);
+				//osDelay(3000);
+				myTask03_Status = INITPASSSTATE;
+			}
+			osDelay(10);
+			break;
+
+		case 30:
+			if (Motor[4].Status == 0){
+				osDelay(200);
+				Motor4_PushOutMode(500);
+				myTask03_Status=INITPASSSTATE;
+			}
+			osDelay(10);
+			break;
+
+		case 20:
+			myTask03_Status=INITPASSSTATE;
 			break;
 
 		case INITFAILSTATE:
