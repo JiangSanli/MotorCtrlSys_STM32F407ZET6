@@ -3,6 +3,8 @@
  * messageTask - 接收上位机发送的协议并解析
  * 更新日志：
  * 2022.07.26 - 新建
+ * 2022.08	-	支持步进电机控制、直流电机PWM控制协议
+ * 2022.09	-	支持CH298 PMT读数模块的协议解析
  */
 
 #include "main.h"
@@ -68,31 +70,32 @@ void deal_buffer_DCmotorCtrl(struct MotorDefine *a)
 {
 	a->MotorNumber = USART5_RX_BUF[1];
 	a->NumberofSteps_StopAccel = USART5_RX_BUF[6];
-	printf("\r\nInput Information: DC Motor%d Run,Duty Cycle: %ld percent\r\n",a->MotorNumber,a->NumberofSteps_StopAccel);
+	if (USART5_RX_BUF[4] == 0x00 ){
+		printf("\r\nInput Information: DC Motor%d STOP! \r\n",a->MotorNumber);
+	}
+	else{
+		printf("\r\nInput Information: DC Motor%d Run,Duty Cycle: %ld percent\r\n",a->MotorNumber,a->NumberofSteps_StopAccel);
+	}
 }
 
 void StartmessageTask(void *argument)
 {
 	osDelay(20);
-
 	uint8_t len = 0;
-
 	printf("messageTask starts! \r\n");
 
-	for(;;)
-	{
+	for(;;){
 		osDelay(1);
-
 	    if(USART_RX_STA&0x8000)
 		{
 	    	len=USART_RX_STA&0x3fff;
 
 			switch ( USART5_RX_BUF[2] )
 			{
-
-			case 0b10000000: 					// 电机控制-位置模式 ，16进制0x80
+			/***   电机控制-位置模式 ，16进制0x80  ***/
+			case 0b10000000:
 				deal_buffer_motorCtrl_position(&Motor_Temp);
-				if (USART5_RX_BUF[3] & 0b00000001){	// 不带编码器模式
+				if (USART5_RX_BUF[3] & 0b00000001){			// 不带编码器模式
 					MotorMove_position(&Motor_Temp,Motor_Temp.TargetPosition);
 				}
 #ifdef JiaYangZhen_EncoderMode
@@ -103,19 +106,22 @@ void StartmessageTask(void *argument)
 				USART_RX_STA=0;
 			break;
 
-			case 0b01000000:  					// 电机控制-参数模式 ，16进制0x40
+			/***   电机控制-参数模式 ，16进制0x40  ***/
+			case 0b01000000:
 				deal_buffer_motorCtrl_data(&Motor_Temp);
 				MotorMove_steps(&Motor_Temp);
 				USART_RX_STA=0;
 			break;
 
-			case 0b00100000:  					// 电机控制-复位 ，16进制0x20
+			/***   电机控制-复位 ，16进制0x20  ***/
+			case 0b00100000:
 				deal_buffer_motorCtrl_reset(&Motor_Temp);
 				Motor_Reset(&Motor_Temp);
 				USART_RX_STA=0;
 			break;
 
-			case 0b00010000:  					// 直流电机控制 0x10
+			/***   直流电机控制 0x10  ***/
+			case 0b00010000:
 				deal_buffer_DCmotorCtrl(&Motor_Temp);
 				if (USART5_RX_BUF[4] == 0x00 ){
 					if( USART5_RX_BUF[5] == 0x02 ){
@@ -136,14 +142,14 @@ void StartmessageTask(void *argument)
 				USART_RX_STA=0;
 			break;
 
-			case 0b00000001: 					// 打印回传接收到的协议数据 ， 16进制0x01
+			/***   打印回传接收到的协议数据  0x01  ***/
+			case 0b00000001:
 				HAL_UART_Transmit_IT(&huart5, USART5_RX_BUF,len);
 				while(__HAL_UART_GET_FLAG(&huart5,UART_FLAG_TC)!=SET);
 				USART_RX_STA=0;
 			break;
 
 			}
-
 		}
 	}
 }

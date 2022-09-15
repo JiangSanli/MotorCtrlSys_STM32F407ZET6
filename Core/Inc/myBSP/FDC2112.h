@@ -7,7 +7,7 @@
 #include "stdio.h"
 #include "string.h"
 
-#define Cap0_Sample_State	11
+#define Cap0_Sample_State	111
 extern 	uint8_t DetectionTask_STATE ;
 #define I2C_Read_Delay		1
 extern 	float Cap_Value_Calibrated[2] ;
@@ -59,5 +59,8 @@ int16_t FDC2112_Read_Data_I2C_CH(uint8_t index);
 void Init_SingleChannel_FDC2212_CH0(void);
 void Init_DoubleChannel_FDC2212(void);
 float Cap_Calculate(uint8_t index);
+
+void CH297_Module_START(void);
+void CH297_Module_STOP(void);
 
 #endif

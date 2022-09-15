@@ -68,7 +68,7 @@ void MX_GPIO_Init(void)
                           |VM8_EnA_Pin|VM7_EnB_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, PA0_Pin|VM8_IN3_Pin|VM8_IN4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, VM8_IN3_Pin|VM8_IN4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, VM7_IN3_Pin|VM7_IN4_Pin|VM7_IN1_Pin|VM7_IN2_Pin
@@ -138,8 +138,14 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PAPin PAPin PAPin */
-  GPIO_InitStruct.Pin = PA0_Pin|VM8_IN3_Pin|VM8_IN4_Pin;
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = Liquid_Detect_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(Liquid_Detect_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PAPin PAPin */
+  GPIO_InitStruct.Pin = VM8_IN3_Pin|VM8_IN4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -244,6 +250,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
   HAL_NVIC_SetPriority(EXTI3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
@@ -264,6 +273,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     switch(GPIO_Pin)
     {
+    	case Liquid_Detect_Pin:
+        	if (Liquid_Detect_GPIO_Port->IDR & Liquid_Detect_Pin){ 	// if Rising edge trigger
+        		;
+        	}
+        	else {
+        		Follow_state = 2;
+        	}
+            break;
+
         case OPT_IN1_Pin:
         	if (OPT_IN1_GPIO_Port->IDR & OPT_IN1_Pin){ 	// if Rising edge trigger
         		;
@@ -326,7 +344,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	}
             break;
 
-        // 微流�?5V小电�?
+        // 微流控5 V电机
         case OPT_IN9_Pin:
         	if (OPT_IN9_GPIO_Port->IDR & OPT_IN9_Pin) { 	// if Rising edge trigger
         		Motor[5].StepPosition =0 ;

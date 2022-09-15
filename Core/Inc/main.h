@@ -95,8 +95,9 @@ void Error_Handler(void);
 #define VM8_SensA_ADC_GPIO_Port GPIOC
 #define VM8_SensB_ADC_Pin GPIO_PIN_3
 #define VM8_SensB_ADC_GPIO_Port GPIOC
-#define PA0_Pin GPIO_PIN_0
-#define PA0_GPIO_Port GPIOA
+#define Liquid_Detect_Pin GPIO_PIN_0
+#define Liquid_Detect_GPIO_Port GPIOA
+#define Liquid_Detect_EXTI_IRQn EXTI0_IRQn
 #define Encoder4_B_Pin GPIO_PIN_1
 #define Encoder4_B_GPIO_Port GPIOA
 #define VM8_IN3_Pin GPIO_PIN_2
@@ -232,10 +233,6 @@ void Error_Handler(void);
 #define VM3_Dir_Pin GPIO_PIN_1
 #define VM3_Dir_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
-
-#define PA0_H()		HAL_GPIO_WritePin(PA0_GPIO_Port, PA0_Pin, GPIO_PIN_SET)
-#define PA0_L()		HAL_GPIO_WritePin(PA0_GPIO_Port, PA0_Pin, GPIO_PIN_RESET)
-#define PA0_Toggle()		HAL_GPIO_TogglePin(PA0_GPIO_Port, PA0_Pin)
 
 #define LED0_ON()		HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET)
 #define LED0_OFF()		HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET)

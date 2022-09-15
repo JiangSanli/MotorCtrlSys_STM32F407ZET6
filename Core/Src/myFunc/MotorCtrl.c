@@ -84,13 +84,36 @@ void Motor_Data_Init(void)
 	Motor[4].deceleration_ratio = 1;
 	Motor[4].step_angle = 1.8;
 	Motor[4].mircro_steps = 4;
-	Motor[4].MaxSpeedInRads= 25;
+	Motor[4].MaxSpeedInRads= 13;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
-	Motor[4].StartupSpeedInRads = 2.5;
-	Motor[4].DesiredSpeedInRads = 5;
-	Motor[4].accelerationRate = 2000;
-	Motor[4].decelerationRate = 1000;
+	Motor[4].StartupSpeedInRads = 4;
+	Motor[4].DesiredSpeedInRads = 12;
+	Motor[4].accelerationRate = 9000;
+	Motor[4].decelerationRate = 6000;
 
+#ifdef JiaYangZhen
+/*  Motor7 : 加样针24V直流电机  A相-抽出液体0.6L/min */
+	Motor[7].MotorNumber = 7;
+	Motor[7].Status = 0,
+	Motor[7].htim_x = &htim12,
+
+	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
+	Motor[7].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/100=1KHz
+	Motor[7].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
+	Motor[7].AccelerationTimeTMR = Motor[7].StepperSpeedTMR ; 	// 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
+
+/*  Motor8 : 加样针24V直流电机  A相针内壁清洗  B相针外壁清洗  */
+	Motor[8].MotorNumber = 8;
+	Motor[8].Status = 0,
+	Motor[8].htim_x = &htim12,
+
+	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
+	Motor[8].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/100=1KHz
+	Motor[8].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
+	Motor[8].AccelerationTimeTMR = Motor[8].StepperSpeedTMR ; 	// 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
+#endif
+
+#ifdef WeiLiuKong
 /*  Motor5 : 微流控5V小电机-摇杆电机,水平圆周运动   */
 	Motor[5].MotorNumber = 5;
 	Motor[5].Status = 0,
@@ -106,7 +129,6 @@ void Motor_Data_Init(void)
 	Motor[5].accelerationRate = 2000;
 	Motor[5].decelerationRate = 1000;
 
-#ifdef WeiLiuKong
 /*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动   */
 	Motor[6].MotorNumber = 6;
 	Motor[6].Status = 0,
@@ -121,21 +143,7 @@ void Motor_Data_Init(void)
 	Motor[6].DesiredSpeedInRads = 10;
 	Motor[6].accelerationRate = 2000;
 	Motor[6].decelerationRate = 1000;
-#endif
 
-#ifdef CiFenLi
-/*  Motor6 : 磁分离5V摇匀直流电机  */
-	Motor[6].MotorNumber = 6;
-	Motor[6].Status = 0,
-	Motor[6].htim_x = &htim12,
-
-	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
-	Motor[6].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/1000=100Hz
-	Motor[6].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
-	Motor[6].AccelerationTimeTMR = Motor[6].StepperSpeedTMR ; // 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
-#endif
-
-#ifdef WeiLiuKong
 /*  Motor7 : 微流控5V小电机-直线电机，水平横向运动   */
 	Motor[7].MotorNumber = 7;
 	Motor[7].Status = 0,
@@ -153,6 +161,16 @@ void Motor_Data_Init(void)
 #endif
 
 #ifdef CiFenLi
+/*  Motor6 : 磁分离5V摇匀直流电机  */
+	Motor[6].MotorNumber = 6;
+	Motor[6].Status = 0,
+	Motor[6].htim_x = &htim12,
+
+	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
+	Motor[6].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/1000=100Hz
+	Motor[6].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
+	Motor[6].AccelerationTimeTMR = Motor[6].StepperSpeedTMR ; // 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
+
 /*  Motor7 : 磁分离24V洗液直流电机  */
 	Motor[7].MotorNumber = 7;
 	Motor[7].Status = 0,
@@ -253,17 +271,17 @@ uint8_t ALL_Motors_Init(uint8_t Motor_Num)
 		}
 	}
 	HAL_Delay(MotorInitDelay);
-	if ( Motor_Num & 0b00000010 ){
-		Motor2_Enable();
-		if ( Motor_Reset(&Motor[2]) ){
-			Motor_Init_Result = Motor_Init_Result | 0b00000010 ;
-		}
-	}
-	HAL_Delay(MotorInitDelay);
 	if ( Motor_Num & 0b00000100 ){
 		Motor3_Enable();
 		if ( Motor_Reset(&Motor[3]) ){
 			Motor_Init_Result = Motor_Init_Result | 0b00000100 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00000010 ){
+		Motor2_Enable();
+		if ( Motor_Reset(&Motor[2]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00000010 ;
 		}
 	}
 	HAL_Delay(MotorInitDelay);
@@ -309,8 +327,7 @@ uint8_t ALL_Motors_Init(uint8_t Motor_Num)
 uint32_t AccelDecelTimeCompute(uint32_t AccelDecelRate)  //根据输入的加减速率，计算加减速计时器的TMR
 {
 	uint32_t temp_AccelDecelTimeTMR;
-	if(AccelDecelRate > MOTORTIM_TMR)
-	{
+	if(AccelDecelRate > MOTORTIM_TMR){
 		printf("[WRONG]AccelDecel Rate Oversize!\r\n"); //如果加减速超过MOTORTIM_TMR（100000Hz/s），判断过快报错
 		return 10000;  // 返回一个较大的加速度增量10kHz
 	}
@@ -320,16 +337,13 @@ uint32_t AccelDecelTimeCompute(uint32_t AccelDecelRate)  //根据输入的加减
 
 void AccelDecel(uint32_t AccelDecelState,struct MotorDefine *a)
 {
-	switch (AccelDecelState)
-	{
+	switch (AccelDecelState){
 	case 0:
-
 	break;
 
 	case ACCEL: // accelerate
 		a->ActualSpeedInHz ++ ;
-		if (a->ActualSpeedInHz >= a->DesiredSpeedInHz)
-		{
+		if (a->ActualSpeedInHz >= a->DesiredSpeedInHz){
 			a->ActualSpeedInHz = a->DesiredSpeedInHz;
 			AccelDecelState = 0;
 		}
@@ -338,8 +352,7 @@ void AccelDecel(uint32_t AccelDecelState,struct MotorDefine *a)
 
 	case DECEL: // decelerate
 		a->ActualSpeedInHz -- ;
-		if (a->ActualSpeedInHz <= a->StartupSpeedInHz)
-		{
+		if (a->ActualSpeedInHz <= a->StartupSpeedInHz){
 			a->ActualSpeedInHz = a->StartupSpeedInHz;
 			AccelDecelState = 0;
 		}
@@ -367,10 +380,13 @@ void Motor_AccelDecel_waveCalculate(struct MotorDefine *a)
 		a->NumberofSteps_StopAccel = a->NumberofSteps - DesiredNumberofSteptoAccel ;
 		a->NumberofSteps_BeginDecel =  DesiredNumberofSteptoDecel ;
 	}
-	else  // 如果行进距离不能完成完整的加减速曲线，则前1/3加速，后2/3减速
+	else  // 如果行进距离不能完成完整的加减速曲线，则前1/3加速，后1/3减速
 	{
 		a->NumberofSteps_StopAccel = a->NumberofSteps /3*2 ;
-		a->NumberofSteps_BeginDecel = a->NumberofSteps /3*2 ;
+		a->NumberofSteps_BeginDecel = a->NumberofSteps /3 ;
+	}
+	if ( a->MotorNumber == 4 ){		// 电机4柱塞泵，防止注液时挂液，取消减速使电机高速注液
+		a->NumberofSteps_BeginDecel = 0 ;
 	}
 }
 
@@ -529,7 +545,7 @@ void MotorMove_position(struct MotorDefine *temp  , int32_t targer_position)
 		MotorDirection_SetUp(&Motor[temp->MotorNumber]) ;
 	}
 	//位置控制情况下，允许总步数多走10步，如果仍没有到达目标位置，则判定超时失败
-	Motor[temp->MotorNumber].NumberofSteps = Motor[temp->MotorNumber].NumberofSteps + 10;
+	Motor[temp->MotorNumber].NumberofSteps = Motor[temp->MotorNumber].NumberofSteps + 5*Motor[temp->MotorNumber].mircro_steps;
 
 	//print_MotorInformation(&Motor[temp->MotorNumber]);
 	HAL_TIM_Base_Start_IT(Motor[temp->MotorNumber].htim_x);
@@ -845,19 +861,30 @@ uint8_t Motor4_SuckInMode(uint32_t x_uL)  // 电机4最大排量1000uL，总行�
 	OUT6_OFF();
 #endif
 #ifdef DushuModule
-	OUT5_OFF();
+	OUT6_OFF();	//洗液电磁阀，常开
+	OUT5_OFF();	//注液电磁阀，常闭
 #endif
-	osDelay(100);
-	printf("Motor4_Sucks in %lduL...\r\n", x_uL);
+	HAL_Delay(300);
+	//printf("Motor4_Sucks in %lduL...\r\n", x_uL);
+#ifdef CiFenLi
 	int32_t target_steps = x_uL * 2 * Motor[4].mircro_steps ;
+#endif
+#ifdef JiaYangZhen
+	int32_t target_steps = x_uL * 8 * Motor[4].mircro_steps ;
+#endif
+#ifdef DushuModule
+	int32_t target_steps = x_uL * 8 * Motor[4].mircro_steps ;
+#endif
 	if(Motor[4].Status == 1){
 		return FAIL;
 	}
-	MotorMove_position(&Motor[4], 0 );
+	if ( Motor[4].StepPosition != 0 ){
+		MotorMove_position(&Motor[4], 0 );
+	}
 	for(uint32_t i = 0 ; Motor[4].Status ; i++){
-		if(i<4000){
+		if(i<3000){
 			i++;
-			osDelay(1);
+			HAL_Delay(1);
 		}
 		else{
 			return FAIL;
@@ -877,11 +904,20 @@ uint8_t Motor4_PushOutMode(uint32_t x_uL)
 	OUT6_ON();
 #endif
 #ifdef DushuModule
+	OUT6_ON();
 	OUT5_ON();
 #endif
-	osDelay(100);
-	printf("Motor4_Pushs out uL...\r\n");
+	HAL_Delay(300);
+	//printf("Motor4_Pushs out uL...\r\n");
+#ifdef CiFenLi
 	int32_t target_position = Motor[4].StepPosition - (x_uL * 2 * Motor[4].mircro_steps) ;
+#endif
+#ifdef JiaYangZhen
+	int32_t target_position = Motor[4].StepPosition - (x_uL * 8 * Motor[4].mircro_steps) ;
+#endif
+#ifdef DushuModule
+	int32_t target_position = Motor[4].StepPosition - (x_uL * 8 * Motor[4].mircro_steps) ;
+#endif
 	if(target_position < 0){
 		printf("[WRONG]Push out Number Overflow!\r\n Maximum Number:%ld uL\r\n",Motor[4].StepPosition/Motor[4].mircro_steps/2);
 		return FAIL;
@@ -906,6 +942,9 @@ void DC_Motor_ON(struct MotorDefine *temp ,char x, uint32_t Duty_Cycle)
 		else if ( temp->MotorNumber == 7 ){
 			VM7_Enable_A();
 		}
+		else if ( temp->MotorNumber == 8 ){
+			VM8_Enable_A();
+		}
 	}
 	else if ( x == 'B' ){
 		Motor[temp->MotorNumber].Status = Motor[temp->MotorNumber].Status | 0b00000001 ;
@@ -914,6 +953,9 @@ void DC_Motor_ON(struct MotorDefine *temp ,char x, uint32_t Duty_Cycle)
 		}
 		else if ( temp->MotorNumber == 7 ){
 			VM7_Enable_B();
+		}
+		else if ( temp->MotorNumber == 8 ){
+			VM8_Enable_B();
 		}
 	}
 
@@ -932,6 +974,9 @@ void DC_Motor_OFF(struct MotorDefine *temp ,char x)
 		else if ( temp->MotorNumber == 7 ){
 			VM7_Disable_A();
 		}
+		else if ( temp->MotorNumber == 8 ){
+			VM8_Disable_A();
+		}
 	}
 	else if ( x == 'B' ){
 		Motor[temp->MotorNumber].Status = Motor[temp->MotorNumber].Status & 0b11111110 ;
@@ -941,9 +986,12 @@ void DC_Motor_OFF(struct MotorDefine *temp ,char x)
 		else if ( temp->MotorNumber == 7 ){
 			VM7_Disable_B();
 		}
+		else if ( temp->MotorNumber == 8 ){
+			VM8_Disable_B();
+		}
 	}
 
-	if ( Motor[6].Status | Motor[7].Status ){;}
+	if ( Motor[6].Status | Motor[7].Status | Motor[8].Status ){;}
 	else{
 		HAL_TIM_Base_Stop_IT(Motor[temp->MotorNumber].htim_x);
 	}

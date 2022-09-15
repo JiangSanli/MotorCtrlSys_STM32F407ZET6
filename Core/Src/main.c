@@ -205,8 +205,6 @@ uint32_t timecount_TIM11 = 0;
 uint32_t AccelDecelcount_TIM11 = 0;
 uint32_t timecount_TIM12 = 0;
 uint32_t AccelDecelcount_TIM12 = 0;
-uint32_t timecount_TIM12_DCM7 = 0 ;
-uint32_t timecount_TIM12_DCM6 = 0 ;
 uint8_t  Motor7_State = 1 ;
 uint32_t timecount_TIM13 = 0;
 uint32_t AccelDecelcount_TIM13 = 0;
@@ -218,6 +216,11 @@ uint8_t  Motor5_State = 1 ;
 uint32_t timecount_TIM7 = 0;
 uint32_t AccelDecelcount_TIM7 = 0;
 uint8_t  Motor6_State = 1 ;
+//直流电机控制
+uint32_t timecount_TIM12_DCM6 = 0 ;
+uint32_t timecount_TIM12_DCM7 = 0 ;
+uint32_t timecount_TIM12_DCM8 = 0 ;
+
 
 /* USER CODE END 4 */
 
@@ -239,21 +242,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
 
-	if (htim->Instance == TIM9) {
+	if (htim->Instance == TIM9) {	// 计时器周期为0.1ms
 		uart_reieve_timeoutCount++;
-		if( USART_RX_STA&0x8000 )   // 如果未收到接收完成标志，判断是否超时
-		{
+		if( USART_RX_STA&0x8000 ){	// 判断串口接收超时
 			uart_reieve_timeoutCount = 0;
 			HAL_TIM_Base_Stop_IT(&htim9);
 		}
-		else
-		{
-			if(uart_reieve_timeoutCount > 100)
-			{
-				printf("\r\n[WRONG] Data Input Illegal !\r\n");
+		else{
+			if(uart_reieve_timeoutCount > 1000){
+				printf("[WRONG] Data Input Illegal ! \r\n");
 				uart_reieve_timeoutCount = 0;
 				USART_RX_STA = 0;
-				//memset(USART5_RX_BUF,0,100);   // 清空缓存
 				HAL_TIM_Base_Stop_IT(&htim9);
 			}
 		}
@@ -380,10 +379,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 			timecount_TIM13++;
 			AccelDecelcount_TIM13++;
-			if (Motor[3].StepPosition > 5000){
+			if (Motor[3].StepPosition > 7000){
 				printf("[WRONG]OverTrip!!!,Motor[3].StepPosition:%ld\r\n",Motor[3].StepPosition);
+				Motor[3].Status = 0;
 				HAL_TIM_Base_Stop_IT(&htim13);
 			}
+			//if (DetectionTask_STATE == Cap0_Sample_State){
 			if (DetectionTask_STATE == Cap0_Sample_State){
 				switch (Follow_state){
 				case 1:
@@ -402,6 +403,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					break;
 				case 2:
 					timecount_TIM13 = 0 ;
+					//使用IO输出模块进行液面检测
+					HAL_TIM_Base_Stop_IT(&htim13);
+					Motor[3].Status = 0;
 					break;
 				case 3:
 					if(timecount_TIM13 <= Pluse_High){
@@ -441,7 +445,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 				if(Motor[3].StepPosition == Motor[3].TargetPosition){
 					Motor[3].Status = 0;
-					//printf("---Motor3 Steps Position:%ld---\r\n",Motor[3].StepPosition);
+					printf("---Motor3 Steps Position:%ld---\r\n",Motor[3].StepPosition);
 					HAL_TIM_Base_Stop_IT(&htim13);
 				}
 				else if (Motor[3].NumberofSteps <= 0){
@@ -492,12 +496,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if(Motor[4].StepPosition == Motor[4].TargetPosition)
 			{
 				Motor[4].Status = 0;
-				printf("---Motor4 Steps Position:%ld---\r\n",Motor[4].StepPosition);
+				//printf("---Motor4 Steps Position:%ld---\r\n",Motor[4].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim14);
 			}
 			else if (Motor[4].NumberofSteps <= 0){
 				Motor[4].Status = 0;
-				printf("[WRONG]Motor4 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[4].StepPosition);
+				//printf("[WRONG]Motor4 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[4].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim14);
 			}
 
@@ -857,6 +861,87 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				if(timecount_TIM12_DCM6 >= Motor[6].StepperSpeedTMR)
 				{
 					timecount_TIM12_DCM6 = 0 ;
+				}
+			}
+	}
+#endif
+
+#ifdef JiaYangZhen
+	else if (htim->Instance == TIM12)
+	{
+			timecount_TIM12_DCM7++;
+			timecount_TIM12_DCM8++;
+			if (Motor[7].Status){
+				if(timecount_TIM12_DCM7 <= Motor[7].AccelerationTimeTMR)
+				{
+					switch( Motor[7].Status ){
+					case 0b00000010:
+						VM7_IN1_H();
+						break;
+					case 0b00000001:
+						VM7_IN4_H();
+						break;
+					case 0b00000011:
+						VM7_IN1_H();
+						VM7_IN4_H();
+						break;
+					}
+				}
+				else if(timecount_TIM12_DCM7 > Motor[7].AccelerationTimeTMR)
+				{
+					switch( Motor[7].Status ){
+					case 0b00000010:
+						VM7_IN1_L();
+						break;
+					case 0b00000001:
+						VM7_IN4_L();
+						break;
+					case 0b00000011:
+						VM7_IN1_L();
+						VM7_IN4_L();
+						break;
+					}
+				}
+				if(timecount_TIM12_DCM7 >= Motor[7].StepperSpeedTMR)
+				{
+					timecount_TIM12_DCM7 = 0 ;
+				}
+			}
+
+			if (Motor[8].Status){
+				if(timecount_TIM12_DCM8 <= Motor[8].AccelerationTimeTMR)
+				{
+					switch( Motor[8].Status ){
+					case 0b00000010:
+						VM8_IN1_H();
+						break;
+					case 0b00000001:
+						VM8_IN4_H();
+						break;
+					case 0b00000011:
+						VM8_IN1_H();
+						VM8_IN4_H();
+						break;
+					}
+				}
+				else if(timecount_TIM12_DCM8 > Motor[8].AccelerationTimeTMR)
+				{
+					switch( Motor[8].Status ){
+					case 0b00000010:
+						VM8_IN1_L();
+						break;
+					case 0b00000001:
+						VM8_IN4_L();
+						break;
+					case 0b00000011:
+						VM8_IN1_L();
+						VM8_IN4_L();
+						break;
+					}
+				}
+				if(timecount_TIM12_DCM8 >= Motor[8].StepperSpeedTMR)
+				{
+					timecount_TIM12_DCM8 = 0 ;
 				}
 			}
 	}
