@@ -244,13 +244,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 	if (htim->Instance == TIM9) {	// 计时器周期为0.1ms
 		uart_reieve_timeoutCount++;
-		if( USART_RX_STA&0x8000 ){	// 判断串口接收超时
+		if( (USART_RX_STA&0x8000) || (USART_RX_STA==0) ){	// 判断串口接收超时
 			uart_reieve_timeoutCount = 0;
 			HAL_TIM_Base_Stop_IT(&htim9);
 		}
 		else{
 			if(uart_reieve_timeoutCount > 1000){
-				printf("[WRONG] Data Input Illegal ! \r\n");
+				printf("[WRONG] Data Input Timeout ! \r\n");
 				uart_reieve_timeoutCount = 0;
 				USART_RX_STA = 0;
 				HAL_TIM_Base_Stop_IT(&htim9);

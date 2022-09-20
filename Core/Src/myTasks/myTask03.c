@@ -218,8 +218,8 @@ void StartTask03(void *argument)
 			if ( (Motor[2].Status == 0) && (Motor[4].Status == 0) ){
 				DetectionTask_STATE = Cap0_Sample_State;
 				//使用IO液面检测模块
-				Follow_state = 1;
-				Motor3_Nreset_direction;
+//				Follow_state = 1;
+//				Motor3_Nreset_direction;
 				printf("---Enter Liquid following mode---\r\n");
 				Motor[3].Status = 1;
 				HAL_TIM_Base_Start_IT(Motor[3].htim_x);
@@ -230,27 +230,27 @@ void StartTask03(void *argument)
 
 		case 12:
 			osDelay(3000);
-//			for (uint32_t t=1 ; Follow_state == 2 ; t++ ){
-//				osDelay(1);
-//				if(t > 100){
-//					Motor4_SuckInMode(200);
-//					osDelay(2000);
-//					myTask03_Status = 13;
-//				}
-//			}
-			if (Motor[3].Status == 0){
-				DetectionTask_STATE = INITPASSSTATE;
-				Motor4_SuckInMode(200);
-				myTask03_Status = 13;
+			for (uint32_t t=1 ; Follow_state == 2 ; t++ ){
+				osDelay(1);
+				if(t > 10){
+					Motor4_SuckInMode(250);
+					osDelay(2000);
+					myTask03_Status = 13;
+				}
 			}
+//			if (Motor[3].Status == 0){
+//				DetectionTask_STATE = INITPASSSTATE;
+//				Motor4_SuckInMode(200);
+//				myTask03_Status = 13;
+//			}
 			osDelay(10);
 			break;
 
 		case 13:
 			if (Motor[4].Status == 0){
-//				HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
-//				Motor[3].Status = 0;
-//				printf("---Close Liquid following mode---\r\n");
+				HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
+				Motor[3].Status = 0;
+				printf("---Close Liquid following mode---\r\n");
 				osDelay(200);
 				MotorMove_position(&Motor[3],-40);
 				myTask03_Status = 14;
@@ -276,7 +276,7 @@ void StartTask03(void *argument)
 
 		case 16:
 			if (Motor[3].Status == 0){
-				Motor4_PushOutMode(200);
+				Motor4_PushOutMode(250);
 				osDelay(2000);
 				myTask03_Status = 17;
 			}
@@ -361,10 +361,7 @@ void StartTask03(void *argument)
 			break;
 
 		case 30:
-			DetectionTask_STATE = Cap0_Sample_State;
-			printf("---Enter Liquid following mode---\r\n");
-			HAL_TIM_Base_Start_IT(Motor[3].htim_x);
-			myTask03_Status = INITPASSSTATE;
+			osDelay(10);
 //			DetectionTask_STATE = INITPASSSTATE;
 //			printf("---Checking following mode Over!---\r\n");
 //			OUT1_OFF();
@@ -504,15 +501,16 @@ void StartTask03(void *argument)
 	osDelay(10);
 	printf("myTask03 starts! \r\n");
 
-	Motor_Data_Init();
-	osDelay(100);
-	if ( 0b00001000 == ALL_Motors_Init(0b00001000) ){
-		printf("Motors Initialization Completed! \r\n");
-		myTask03_Status = INITPASSSTATE;
-	}
-	else{
-		myTask03_Status = INITFAILSTATE;
-	}
+//	Motor_Data_Init();
+//	osDelay(100);
+//	if ( 0b00001000 == ALL_Motors_Init(0b00001000) ){
+//		printf("Motors Initialization Completed! \r\n");
+//		myTask03_Status = INITPASSSTATE;
+//	}
+//	else{
+//		myTask03_Status = INITFAILSTATE;
+//	}
+	myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -584,7 +582,7 @@ void StartTask03(void *argument)
 
 		case 30:	//	KEY2： 正常流程- 吸液200uL-开始计数-注液200uL-持续7秒后输出结果
 			if (Motor[4].Status == 0){
-				Motor4_SuckInMode(200);
+				Motor4_SuckInMode(100);
 				myTask03_Status = 31;
 			}
 			osDelay(10);
@@ -595,7 +593,7 @@ void StartTask03(void *argument)
 			break;
 		case 32:
 			if (Motor[4].Status == 0){
-				Motor4_PushOutMode(200);
+				Motor4_PushOutMode(100);
 				myTask03_Status=33;
 			}
 			osDelay(10);

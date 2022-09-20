@@ -25,8 +25,8 @@
 #include "tim.h"
 
 uint8_t aRxBuffer[1];  // HAL库使用的串口接收缓冲
-uint8_t USART5_RX_BUF[100];	//接收缓冲，最大接�???100字节
-uint16_t USART_RX_STA = 0;       //接收状�?�标�???
+uint8_t USART5_RX_BUF[100];	// Data Receive Buffer
+uint16_t USART_RX_STA = 0;       // Data Receive Status Mark
 //bit15			接收完成标志 0x55
 //bit14			接收起始标志 0xAA
 //bit13~bit0	接收到的有效字节数目
@@ -370,7 +370,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if(huart->Instance==UART5)
 	{
 		if ( USART_RX_STA&0x8000 ){		// 判断是否已经完成接收(bit15-1则已接收完成)
-			;							// 如果完成�?次数据接收且尚未处理，则不接受后续数�?
+			;							// 如果完成接收数据接收且尚未处理，则不接受后续data
 		}
 		else{
 			if( USART_RX_STA&0x4000 ){		// 判断是否已收到起始位
@@ -384,7 +384,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					USART_RX_STA++;
 				}
 			}
-			else{							// 如果没有收到起始�?
+			else{							// 如果没有收到起始位
 				if(aRxBuffer[0]==0xAA){
 					USART_RX_STA|=0x4000;
 					USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
@@ -416,12 +416,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			if( USART_RX_STA&0x4000 ){		// 判断是否已收到起始位
 				USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
 				USART_RX_STA++;
-				if ( (USART_RX_STA&0X3FFF) >=6  ){
+				if ( (USART_RX_STA&0X3FFF) >= 6 ){
 					USART_RX_STA|=0x8000;
 				}
 			}
 			else{
-				if( aRxBuffer[0]==0xFF ){	// 判断接收输入是否为中断起始位
+				if( aRxBuffer[0] == 0xFF ){	// 判断接收输入是否为中断起始位
 					USART_RX_STA|=0x4000;
 					USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
 					USART_RX_STA++;

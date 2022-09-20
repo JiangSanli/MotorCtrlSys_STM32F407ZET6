@@ -7,14 +7,20 @@
 #include "stdio.h"
 #include "string.h"
 
+
+//#define FDC2112
+#define FDC2214
 #define Cap0_Sample_State	111
 extern 	uint8_t DetectionTask_STATE ;
-#define I2C_Read_Delay		1
 extern 	float Cap_Value_Calibrated[2] ;
 extern 	uint8_t Follow_state ;
 
 // FDC2x1x Internal master clock frequency range : 35 - 55MHz  Typical fclk : 43.4MHz
+#ifdef FDC2112
 #define FDC2112_Address 	0x2A	// ADDR->low: 0x2A , ADDR->high: 0x2B
+#else
+#define FDC2112_Address 	0x2B	// ADDR->low: 0x2A , ADDR->high: 0x2B
+#endif
 #define FDC2112_W 			FDC2112_Address<<1		// 0:Write
 #define FDC2112_R 			(FDC2112_Address<<1)+1	// 1:Read
 #define DATA_CH0 			0x00    //通道0数据的高12位
@@ -26,19 +32,19 @@ extern 	uint8_t Follow_state ;
 //#define DATA_CH3 			0x06
 //#define DATA_LSB_CH3 		0x07
 #define RCOUNT_CH0 			0x08 	//Conversion Time Configuration Registers-转换时间配置寄存器. CONVERSION TIME=(CH0_RCOUNT*16)/fREF0
-//#define RCOUNT_CH1 			0x09
+#define RCOUNT_CH1 			0x09
 //#define RCOUNT_CH2 			0x0A
 //#define RCOUNT_CH3 			0x0B
 #define OFFSET_CH0 			0x0C	//Frequency Offset Registers-fOFFSET0 = CH0_OFFSET * (fREF0/(2^16))
-//#define OFFSET_CH1 			0x0D
+#define OFFSET_CH1 			0x0D
 //#define OFFSET_CH2 			0x0E
 //#define OFFSET_CH3 			0x0F
 #define SETTLECOUNT_CH0 	0x10	//Settling Time Register Configuration-通道建立时间配置寄存器.CONVERSION TIME=(CH0_SETTLECOUNT*16)/fREF0
-//#define SETTLECOUNT_CH1		0x11
+#define SETTLECOUNT_CH1		0x11
 //#define SETTLECOUNT_CH2 	0x12
 //#define SETTLECOUNT_CH3 	0x13
 #define CH0_FREF_DIVIDER 	0x14	//Clock Configuration Registers-时钟频率配置寄存器. CH0_FREF_DIVIDER [9:0] fREF0 = fCLK / CH0_FREF_DIVIDER
-//#define CH1_FREF_DIVIDER 	0x15	//fIN0 : CH0_FIN_SEL [13:12]  fIN0 = fSENSOR0 / CH0_FIN_SEL
+#define CH1_FREF_DIVIDER 	0x15	//fIN0 : CH0_FIN_SEL [13:12]  fIN0 = fSENSOR0 / CH0_FIN_SEL
 //#define CH2_FREF_DIVIDER 	0x16
 //#define CH3_FREF_DIVIDER 	0x17
 #define STATUS 0x18				//Refer to Register Maps section for a description of the individual status bits.
@@ -47,7 +53,7 @@ extern 	uint8_t Follow_state ;
 #define MUX_CONFIG 0x1B			//see page 35,Table 39
 #define RESET_DEV 0x1C
 #define DRIVE_CURRENT_CH0 0x1E	//[15:11] Channel 0 Sensor drive current
-//#define DRIVE_CURRENT_CH1 0x1F
+#define DRIVE_CURRENT_CH1 0x1F
 //#define DRIVE_CURRENT_CH2 0x20
 //#define DRIVE_CURRENT_CH3 0x21
 #define MANUFACTURER_ID 0x7E	//[15:0]  Manufacturer ID = 0x5449
@@ -55,7 +61,7 @@ extern 	uint8_t Follow_state ;
 
 void FDC2112_Write_Reg_I2C(uint16_t MemAddress,uint16_t data);
 uint16_t FDC2112_Read_Reg_I2C(uint16_t MemAddress);
-int16_t FDC2112_Read_Data_I2C_CH(uint8_t index);
+uint32_t FDC2112_Read_Data_I2C_CH(uint8_t index);
 void Init_SingleChannel_FDC2212_CH0(void);
 void Init_DoubleChannel_FDC2212(void);
 float Cap_Calculate(uint8_t index);
@@ -64,3 +70,4 @@ void CH297_Module_START(void);
 void CH297_Module_STOP(void);
 
 #endif
+

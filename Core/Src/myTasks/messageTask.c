@@ -161,16 +161,13 @@ void StartmessageTask(void *argument)
 	uint32_t med32 = 0;
 	printf("messageTask starts! \r\n");
 
-	for(;;)
-	{
+	for(;;){
 		osDelay(1);
-	    if(USART_RX_STA&0x8000)
-		{
+	    if(USART_RX_STA&0x8000){
 	    	med32 = ((USART5_RX_BUF[1] << 24) | (USART5_RX_BUF[2] << 16) | (USART5_RX_BUF[3] << 8) | (USART5_RX_BUF[4]));
-	    	USART_RX_STA=0;
 	    	printf("%ld\n", med32);
+	    	USART_RX_STA=0;
 		}
-
 	}
 }
 #endif
