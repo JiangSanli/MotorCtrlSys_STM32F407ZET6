@@ -148,6 +148,126 @@ void StartTask03(void *argument)
 
 
 #ifdef JiaYangZhen
+#ifdef RZ_stepmotor
+void StartTask03(void *argument)
+{
+	osDelay(10);
+	printf("myTask03 starts! \r\n");
+
+	Motor_Data_Init();
+	osDelay(100);
+	if ( 0b00000101 == ALL_Motors_Init(0b00000101) ){
+		printf("Motors Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
+
+	for(;;)
+	{
+		osDelay(1);
+		switch (myTask03_Status)
+		{
+		case INITPASSSTATE:
+			osDelay(10);
+			if(KEY0_Pressed())
+			{
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					myTask03_Status = 10;
+					printf("Key0 pressed!\r\n");
+				}
+			}
+			if(KEY1_Pressed())
+			{
+				osDelay(20);
+				if(KEY1_Pressed())
+				{
+					osDelay(20);
+					while (KEY1_Pressed()){osDelay(1);}
+					myTask03_Status = 20;
+					printf("Key1 pressed!\r\n");
+				}
+			}
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 30;
+					printf("Key2 pressed!\r\n");
+				}
+			}
+			break;
+
+//		case 9:
+//			if ( Motor[3].Status == 0 ){
+//				MotorMove_position(&Motor[3],1300);
+//				myTask03_Status = 10;
+//			}
+//			osDelay(10);
+//			break;
+
+		case 10:
+			if ( Motor[1].Status == 0 ){
+				MotorMove_position(&Motor[1],5000);
+				myTask03_Status = 11;
+			}
+			osDelay(10);
+			break;
+
+		case 11:
+			if ( Motor[1].Status == 0 ){
+				MotorMove_position(&Motor[1],1024);
+				myTask03_Status = 12;
+			}
+			osDelay(10);
+			break;
+
+		case 12:
+			if ( Motor[1].Status == 0 ){
+				osDelay(2000);
+				MotorMove_position(&Motor[1],5000);
+				myTask03_Status = 13;
+			}
+			osDelay(10);
+			break;
+//
+//		case 13:
+//			if ( Motor[3].Status == 0 ){
+//				MotorMove_position(&Motor[3],-40);
+//				myTask03_Status = 10;
+//			}
+//			osDelay(10);
+//			break;
+
+		case 13:
+			if ( Motor[1].Status == 0 ){
+				MotorMove_position(&Motor[1],0);
+				myTask03_Status = 14;
+			}
+			osDelay(10);
+			break;
+
+		case 14:
+			if ( Motor[1].Status == 0 ){
+				osDelay(800);
+				MotorMove_position(&Motor[1],1024);
+				osDelay(2000);
+				myTask03_Status = 10;
+			}
+			osDelay(10);
+			break;
+		}
+	}
+}
+#else
 void StartTask03(void *argument)
 {
 	osDelay(10);
@@ -229,13 +349,12 @@ void StartTask03(void *argument)
 			break;
 
 		case 12:
-			osDelay(3000);
 			for (uint32_t t=1 ; Follow_state == 2 ; t++ ){
 				osDelay(1);
-				if(t > 10){
-					Motor4_SuckInMode(250);
-					osDelay(2000);
+				if(t > 50){
+					Motor4_SuckInMode(230);
 					myTask03_Status = 13;
+					break;
 				}
 			}
 //			if (Motor[3].Status == 0){
@@ -250,6 +369,7 @@ void StartTask03(void *argument)
 			if (Motor[4].Status == 0){
 				HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
 				Motor[3].Status = 0;
+				DetectionTask_STATE = INITPASSSTATE;
 				printf("---Close Liquid following mode---\r\n");
 				osDelay(200);
 				MotorMove_position(&Motor[3],-40);
@@ -276,7 +396,7 @@ void StartTask03(void *argument)
 
 		case 16:
 			if (Motor[3].Status == 0){
-				Motor4_PushOutMode(250);
+				Motor4_PushOutMode(230);
 				osDelay(2000);
 				myTask03_Status = 17;
 			}
@@ -351,25 +471,20 @@ void StartTask03(void *argument)
 
 
 		case 20:
-			//DetectionTask_STATE = 70;
-			//printf("---Checking following mode---\r\n");
-			//HAL_TIM_Base_Start_IT(Motor[3].htim_x);
-			OUT1_ON();	// 加样针外壁清洗排除液体电磁阀
-			OUT2_ON();	// 加样针外壁清洗注入液体电磁阀
-			OUT5_ON();	// 柱塞泵加入液体电磁阀
+			DetectionTask_STATE = Cap0_Sample_State;
+			printf("---Enter Liquid following mode---\r\n");
+			Motor[3].Status = 1;
+			HAL_TIM_Base_Start_IT(Motor[3].htim_x);
 			myTask03_Status = INITPASSSTATE;
 			break;
 
 		case 30:
-			osDelay(10);
-//			DetectionTask_STATE = INITPASSSTATE;
-//			printf("---Checking following mode Over!---\r\n");
-//			OUT1_OFF();
-//			OUT2_OFF();
-//			OUT5_OFF();
-//			myTask03_Status = INITPASSSTATE;
+			HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
+			Motor[3].Status = 0;
+			DetectionTask_STATE = INITPASSSTATE;
+			printf("---Checking following mode Over!---\r\n");
+			myTask03_Status = INITPASSSTATE;
 			break;
-
 
 
 		case INITFAILSTATE:
@@ -380,6 +495,7 @@ void StartTask03(void *argument)
 	}
 
 }
+#endif
 #endif
 
 #ifdef WeiLiuKong
@@ -501,16 +617,16 @@ void StartTask03(void *argument)
 	osDelay(10);
 	printf("myTask03 starts! \r\n");
 
-//	Motor_Data_Init();
-//	osDelay(100);
-//	if ( 0b00001000 == ALL_Motors_Init(0b00001000) ){
-//		printf("Motors Initialization Completed! \r\n");
-//		myTask03_Status = INITPASSSTATE;
-//	}
-//	else{
-//		myTask03_Status = INITFAILSTATE;
-//	}
-	myTask03_Status = INITPASSSTATE;
+	Motor_Data_Init();
+	osDelay(100);
+	if ( 0b00001000 == ALL_Motors_Init(0b00001000) ){
+		printf("Motors Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
+	//myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -567,14 +683,16 @@ void StartTask03(void *argument)
 			break;
 
 		case 20:	//	KEY1： 直接读书7秒，不进行洗液和注液
+			printf("-7\n");
+			osDelay(50);
 			CH297_Module_START();
-			osDelay(7310);
+			osDelay(10800);
 			myTask03_Status = 21;
 			break;
 
 		case 21:
 			CH297_Module_STOP();
-			osDelay(10);
+			osDelay(50);
 			printf("-1\n");
 			osDelay(10);
 			myTask03_Status = INITPASSSTATE;
@@ -582,26 +700,29 @@ void StartTask03(void *argument)
 
 		case 30:	//	KEY2： 正常流程- 吸液200uL-开始计数-注液200uL-持续7秒后输出结果
 			if (Motor[4].Status == 0){
-				Motor4_SuckInMode(100);
+				Motor4_SuckInMode(200);
 				myTask03_Status = 31;
 			}
 			osDelay(10);
 		case 31:
-			CH297_Module_START();
-			osDelay(2000);
-			myTask03_Status = 32;
-			break;
-		case 32:
 			if (Motor[4].Status == 0){
-				Motor4_PushOutMode(100);
-				myTask03_Status=33;
+				printf("-7\n");
+				osDelay(50);
+				CH297_Module_START();
+				myTask03_Status = 32;
 			}
 			osDelay(10);
 			break;
+		case 32:
+			osDelay(490);
+			Motor4_PushOutMode(200);
+			myTask03_Status=33;
+			break;
 		case 33:
-			osDelay(5000);
+			//osDelay(10000);
+			osDelay(60000);
 			CH297_Module_STOP();
-			osDelay(100);
+			osDelay(50);
 			printf("-1\n");
 			osDelay(10);
 			myTask03_Status=INITPASSSTATE;

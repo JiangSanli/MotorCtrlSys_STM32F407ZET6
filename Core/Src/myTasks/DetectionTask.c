@@ -33,8 +33,7 @@ uint8_t init_Calibration_Value(uint8_t index)
 {
 	Calibration_Value[index] = 0;
 	float temp_value = 0;
-	uint8_t i=0;
-	for (i=1 ; i<=100 ; i++){
+	for (uint8_t i=1 ; i<=100 ; i++){
 		temp_value = Cap_Calculate(index);
 		HAL_Delay(1);
 		if (temp_value < 100000000){	// 如果Cap_Calculate返回inf，则表示读取I2C失败
@@ -50,10 +49,23 @@ uint8_t init_Calibration_Value(uint8_t index)
 	return INITPASSSTATE ;
 }
 
-float get_Calibrated_Value(uint8_t index)
+float get_Calibrated_Value(uint8_t index)  // 读取5次取平均
 {
-	Cap_Value[index] = Cap_Calculate(index);
-	return ( Cap_Value[index] - Calibration_Value[index] ) ;
+	float Cap_temp_Value = 0;
+	float temp_value = 0;
+	for (uint8_t i=1 ; i<=3 ; i++){
+		temp_value = Cap_Calculate(index);
+		HAL_Delay(1);
+		if (temp_value < 100000000){	// 如果Cap_Calculate返回inf，则表示读取I2C失败
+			Cap_temp_Value = Cap_temp_Value + temp_value;
+		}
+		else{
+			printf("[WRONG]Cap_Value Capture FAILED!\r\n");
+			return 0 ;
+		}
+	}
+	Cap_temp_Value = Cap_temp_Value / 3 ;
+	return ( Cap_temp_Value - Calibration_Value[index] ) ;
 }
 
 void StartDetectionTask(void *argument)
@@ -61,10 +73,11 @@ void StartDetectionTask(void *argument)
 	osDelay(50);
 	printf("DetectionTask starts! \r\n");
 
-	Init_DoubleChannel_FDC2212();
-	osDelay(100);
-	DetectionTask_STATE = init_Calibration_Value(0);
-	osDelay(100);
+//	Init_DoubleChannel_FDC2212();
+//	osDelay(100);
+//	DetectionTask_STATE = init_Calibration_Value(0);
+//	osDelay(100);
+	DetectionTask_STATE = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -90,38 +103,8 @@ void StartDetectionTask(void *argument)
 			break;
 
 		case INITPASSSTATE:
-			osDelay(10);
-//			if(KEY0_Pressed())
-//			{
-//				osDelay(20);
-//				if(KEY0_Pressed())
-//				{
-//					osDelay(20);
-//					while (KEY0_Pressed()){osDelay(1);}
-//					DetectionTask_STATE = 70;
-//					printf("Key0 pressed!\r\n");
-//				}
-//			}
-			if(KEY1_Pressed()){
-				osDelay(20);
-				if(KEY1_Pressed()){
-					osDelay(20);
-					while (KEY1_Pressed()){osDelay(1);}
-					DetectionTask_STATE = 71;
-					printf("Key1 pressed!\r\n");
-				}
-			}
-//			if(KEY2_Pressed())
-//			{
-//				osDelay(20);
-//				if(KEY2_Pressed())
-//				{
-//					osDelay(20);
-//					while (KEY2_Pressed()){osDelay(1);}
-//					DetectionTask_STATE = INITPASSSTATE;
-//					printf("Key2 pressed!\r\n");
-//				}
-//			}
+			osDelay(100);
+
 			break;
 
 		case 70:
@@ -134,20 +117,7 @@ void StartDetectionTask(void *argument)
 
 		case 71:
 			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
-			if (Cap_Value_Calibrated[0] < 2){
-				Motor3_Nreset_direction;
-				Motor[3].StepperSpeedTMR = 33 ;
-				Follow_state = 1;
-			}
-			else if ( (Cap_Value_Calibrated[0] > 2) && (Cap_Value_Calibrated[0] <= 3) ){
-				Follow_state = 2;
-			}
-			else {
-				Motor3_reset_direction;
-				Motor[3].StepperSpeedTMR = 50 - 7*(Cap_Value_Calibrated[0]-3) ;
-				Follow_state = 3;
-			}
-			printf("Cap_Value_Calibrated:%.2f \r\n",Cap_Value_Calibrated[0]);
+			printf("%.2f\n",Cap_Value_Calibrated[0]);
 			osDelay(10);
 			if(KEY2_Pressed()){
 				DetectionTask_STATE = INITPASSSTATE;
@@ -156,17 +126,22 @@ void StartDetectionTask(void *argument)
 
 		case Cap0_Sample_State:
 			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
-			if (Cap_Value_Calibrated[0] < 2){
+			if (Cap_Value_Calibrated[0] < 0.05){
 				Motor3_Nreset_direction;
 				Motor[3].StepperSpeedTMR = 33 ;
 				Follow_state = 1;
 			}
-			else if ( (Cap_Value_Calibrated[0] > 2) && (Cap_Value_Calibrated[0] <= 3) ){
+			else if ( (Cap_Value_Calibrated[0] > 0.05) && (Cap_Value_Calibrated[0] <= 0.15) ){
+				Motor3_Nreset_direction;
+				Motor[3].StepperSpeedTMR = 200 ;
+				Follow_state = 1;
+			}
+			else if ( (Cap_Value_Calibrated[0] > 0.15) && (Cap_Value_Calibrated[0] <= 0.22) ){
 				Follow_state = 2;
 			}
 			else {
 				Motor3_reset_direction;
-				Motor[3].StepperSpeedTMR = 50 - 7*(Cap_Value_Calibrated[0]-3) ;
+				Motor[3].StepperSpeedTMR = 100 - 100*(Cap_Value_Calibrated[0]-0.22) ;
 				Follow_state = 3;
 			}
 			//osDelay(1000);
@@ -174,7 +149,7 @@ void StartDetectionTask(void *argument)
 
 		case INITFAILSTATE:
 			printf("[WRONG]init_Calibration_Value FAILED,reCalibrating...\r\n");
-			osDelay(3000);
+			osDelay(5000);
 			DetectionTask_STATE = init_Calibration_Value(0);
 
 		}
@@ -185,7 +160,7 @@ void StartDetectionTask(void *argument)
 
 #else
 
-uint8_t CH297_SampleTime[] = "T1\r\n" ;
+uint8_t CH297_SampleTime[] = "T10\r\n" ;
 uint8_t CH297_Start[] = "S\r\n" ;
 uint8_t CH297_End[] = "E\r\n" ;
 uint8_t CH297_ResolutionTime[] = "C17\r\n" ;

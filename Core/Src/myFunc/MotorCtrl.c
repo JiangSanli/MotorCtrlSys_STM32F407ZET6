@@ -12,6 +12,7 @@ struct MotorDefine Motor[10];
 
 void Motor_Data_Init(void)
 {
+#ifdef CiFenLi
 /*  Motor1:磁分离42步进电机，传动比2：5  */
 	Motor[1].MotorNumber = 1;
 	Motor[1].Status = 0,
@@ -26,7 +27,7 @@ void Motor_Data_Init(void)
 	Motor[1].DesiredSpeedInRads = 2;
 	Motor[1].accelerationRate = 2000;
 	Motor[1].decelerationRate = 1000;
-#ifdef CiFenLi
+
 /*  Motor2:磁分离35步进丝杆电机，导程4.8768mm，步长0.024384mm/步  */
 	Motor[2].MotorNumber = 2;
 	Motor[2].Status = 0,
@@ -43,6 +44,21 @@ void Motor_Data_Init(void)
 	Motor[2].decelerationRate = 1000;
 #endif
 #ifdef JiaYangZhen
+/*  Motor1:RZ步进电机模块的R轴电机  */
+	Motor[1].MotorNumber = 1;
+	Motor[1].Status = 0,
+	Motor[1].htim_x = &htim10,
+	//机械参数
+	Motor[1].deceleration_ratio = 2;
+	Motor[1].step_angle = 1.8;
+	Motor[1].mircro_steps = 16;
+	Motor[1].MaxSpeedInRads= 25;
+	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+	Motor[1].StartupSpeedInRads = 0.6;
+	Motor[1].DesiredSpeedInRads = 8;
+	Motor[1].accelerationRate = 5000;
+	Motor[1].decelerationRate = 3600;
+
 /*  Motor2: 加样针水平方向步进电机，4细分800步每圈，编码器为1000P/R */
 	Motor[2].MotorNumber = 2;
 	Motor[2].Status = 0,
@@ -86,7 +102,7 @@ void Motor_Data_Init(void)
 	Motor[4].mircro_steps = 4;
 	Motor[4].MaxSpeedInRads= 13;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
-	Motor[4].StartupSpeedInRads = 4;
+	Motor[4].StartupSpeedInRads = 6;
 	Motor[4].DesiredSpeedInRads = 12;
 	Motor[4].accelerationRate = 9000;
 	Motor[4].decelerationRate = 6000;

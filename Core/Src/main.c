@@ -384,7 +384,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				Motor[3].Status = 0;
 				HAL_TIM_Base_Stop_IT(&htim13);
 			}
-			//if (DetectionTask_STATE == Cap0_Sample_State){
 			if (DetectionTask_STATE == Cap0_Sample_State){
 				switch (Follow_state){
 				case 1:
@@ -404,8 +403,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				case 2:
 					timecount_TIM13 = 0 ;
 					//使用IO输出模块进行液面检测
-					HAL_TIM_Base_Stop_IT(&htim13);
-					Motor[3].Status = 0;
+//					HAL_TIM_Base_Stop_IT(&htim13);
+//					Motor[3].Status = 0;
 					break;
 				case 3:
 					if(timecount_TIM13 <= Pluse_High){

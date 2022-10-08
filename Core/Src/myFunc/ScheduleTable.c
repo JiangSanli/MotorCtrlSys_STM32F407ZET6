@@ -9,13 +9,11 @@
 #include "stdlib.h"
 #include "ScheduleTable.h"
 
-////定义电机的数组结构体
-//struct MotorDefine turntable[14];
-
 uint32_t TPMark[14] ={0};
 
 void Turntable_Position_Init(void)
 {
+	// micro_steps=8
 	TPMark[0] = 5;
 	TPMark[1] = 296;
 	TPMark[2] = 575;
