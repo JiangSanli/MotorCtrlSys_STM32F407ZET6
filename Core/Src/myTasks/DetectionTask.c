@@ -73,10 +73,10 @@ void StartDetectionTask(void *argument)
 	osDelay(50);
 	printf("DetectionTask starts! \r\n");
 
-//	Init_DoubleChannel_FDC2212();
-//	osDelay(100);
-//	DetectionTask_STATE = init_Calibration_Value(0);
-//	osDelay(100);
+	Init_DoubleChannel_FDC2212();
+	osDelay(100);
+	//DetectionTask_STATE = init_Calibration_Value(0);
+	osDelay(100);
 	DetectionTask_STATE = INITPASSSTATE;
 
 	for(;;)
@@ -95,7 +95,6 @@ void StartDetectionTask(void *argument)
 		case 1:
 			if( Motor[4].Status == 0 ){
 				Init_DoubleChannel_FDC2212();
-				//Init_SingleChannel_FDC2212_CH0();
 				osDelay(300);
 				DetectionTask_STATE = init_Calibration_Value(0);
 			}
@@ -108,17 +107,24 @@ void StartDetectionTask(void *argument)
 			break;
 
 		case 70:
-			Init_DoubleChannel_FDC2212();
-			osDelay(100);
-			init_Calibration_Value(0);
-			osDelay(100);
-			DetectionTask_STATE = INITPASSSTATE;
+//			Init_DoubleChannel_FDC2212();
+//			osDelay(100);
+//			init_Calibration_Value(0);
+//			osDelay(100);
+//			DetectionTask_STATE = INITPASSSTATE;
+			init_Calibration_Value(1);
+			osDelay(200);
+			DetectionTask_STATE = 71;
 			break;
 
 		case 71:
-			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
-			printf("%.2f\n",Cap_Value_Calibrated[0]);
-			osDelay(10);
+//			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
+//			printf("%.2f\n",Cap_Value_Calibrated[0]);
+//			osDelay(10);
+			Cap_Value_Calibrated[1] = get_Calibrated_Value(1);
+			printf("%.2f\r\n",Cap_Value_Calibrated[1]);
+			osDelay(200);
+
 			if(KEY2_Pressed()){
 				DetectionTask_STATE = INITPASSSTATE;
 			}
@@ -136,12 +142,12 @@ void StartDetectionTask(void *argument)
 				Motor[3].StepperSpeedTMR = 200 ;
 				Follow_state = 1;
 			}
-			else if ( (Cap_Value_Calibrated[0] > 0.15) && (Cap_Value_Calibrated[0] <= 0.22) ){
+			else if ( (Cap_Value_Calibrated[0] > 0.15) && (Cap_Value_Calibrated[0] <= 0.4) ){
 				Follow_state = 2;
 			}
 			else {
 				Motor3_reset_direction;
-				Motor[3].StepperSpeedTMR = 100 - 100*(Cap_Value_Calibrated[0]-0.22) ;
+				Motor[3].StepperSpeedTMR = 200 - 100*(Cap_Value_Calibrated[0]-0.4) ;
 				Follow_state = 3;
 			}
 			//osDelay(1000);
@@ -160,7 +166,7 @@ void StartDetectionTask(void *argument)
 
 #else
 
-uint8_t CH297_SampleTime[] = "T10\r\n" ;
+uint8_t CH297_SampleTime[] = "T5\r\n" ;
 uint8_t CH297_Start[] = "S\r\n" ;
 uint8_t CH297_End[] = "E\r\n" ;
 uint8_t CH297_ResolutionTime[] = "C17\r\n" ;
@@ -197,6 +203,7 @@ void StartDetectionTask(void *argument)
 	osDelay(100);
 	CH297_Module_Init();
 	osDelay(100);
+	printf("CH345 Init Completed! \r\n");
 	DetectionTask_STATE = INITPASSSTATE ;
 
 	for(;;)
@@ -234,11 +241,8 @@ void StartDetectionTask(void *argument)
 		case INITFAILSTATE:
 			printf("[WRONG]init_Calibration_Value FAILED,reCalibrating...\r\n");
 			osDelay(3000);
-
 		}
-
 	}
-
 }
 #endif
 

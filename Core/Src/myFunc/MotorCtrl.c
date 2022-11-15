@@ -102,10 +102,10 @@ void Motor_Data_Init(void)
 	Motor[4].mircro_steps = 4;
 	Motor[4].MaxSpeedInRads= 13;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
-	Motor[4].StartupSpeedInRads = 6;
-	Motor[4].DesiredSpeedInRads = 12;
-	Motor[4].accelerationRate = 9000;
-	Motor[4].decelerationRate = 6000;
+	Motor[4].StartupSpeedInRads = 5;
+	Motor[4].DesiredSpeedInRads = 10;
+	Motor[4].accelerationRate = 20000;
+	Motor[4].decelerationRate = 10000;
 
 #ifdef JiaYangZhen
 /*  Motor7 : 加样针24V直流电机  A相-抽出液体0.6L/min */
@@ -638,8 +638,6 @@ void MotorRun_LowSpeed(struct MotorDefine *temp)
 
 	Motor[temp->MotorNumber].StepsInOneCircle = temp->StepsInOneCircle ;
 	Motor[temp->MotorNumber].StartupSpeedInHz = temp->StartupSpeedInHz ;
-//	Motor[temp->MotorNumber].ActualSpeedInHz = temp->ActualSpeedInHz ;
-//	Motor[temp->MotorNumber].DesiredSpeedInHz = temp->DesiredSpeedInHz ;
 	Motor[temp->MotorNumber].StepperSpeedTMR = temp->StepperSpeedTMR ;
 	Motor[temp->MotorNumber].NumberofSteps = temp->NumberofSteps ;
 	Motor[temp->MotorNumber].MotorDirection = temp->MotorDirection ;
@@ -648,7 +646,6 @@ void MotorRun_LowSpeed(struct MotorDefine *temp)
 	Motor[temp->MotorNumber].TargetPosition = -16777200 ; //暂时设置目标位置为无法达到的值，参数控制模式用步进数控制中断停止
 
 	MotorDirection_SetUp(&Motor[temp->MotorNumber]) ;
-	//print_MotorInformation(&Motor[temp->MotorNumber]);
 	HAL_TIM_Base_Start_IT(Motor[temp->MotorNumber].htim_x);
 }
 
@@ -661,7 +658,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 {
 	if (Motor[temp->MotorNumber].Status == 1){
 		printf("[WRONG] Reset Failed,Motor%d is busy!\r\n",temp->MotorNumber);
-		return 1;
+		return FAIL;
 	}
 	*temp = Motor[temp->MotorNumber];
 
@@ -877,11 +874,12 @@ uint8_t Motor4_SuckInMode(uint32_t x_uL)  // 电机4最大排量1000uL，总行�
 	OUT6_OFF();
 #endif
 #ifdef DushuModule
-	OUT6_OFF();	//洗液电磁阀，常开
-	OUT5_OFF();	//注液电磁阀，常闭
+	OUT6_ON();	//吸液电磁阀，NC
+	OUT5_OFF();	//注液电磁阀，NC
 #endif
 	HAL_Delay(300);
 	//printf("Motor4_Sucks in %lduL...\r\n", x_uL);
+
 #ifdef CiFenLi
 	int32_t target_steps = x_uL * 2 * Motor[4].mircro_steps ;
 #endif
@@ -906,7 +904,9 @@ uint8_t Motor4_SuckInMode(uint32_t x_uL)  // 电机4最大排量1000uL，总行�
 			return FAIL;
 		}
 	}
+#ifndef WeiLiuKong
 	MotorMove_position(&Motor[4], target_steps );
+#endif
 	return SUCCESS;
 }
 
@@ -920,7 +920,7 @@ uint8_t Motor4_PushOutMode(uint32_t x_uL)
 	OUT6_ON();
 #endif
 #ifdef DushuModule
-	OUT6_ON();
+	OUT6_OFF();
 	OUT5_ON();
 #endif
 	HAL_Delay(300);
@@ -934,6 +934,7 @@ uint8_t Motor4_PushOutMode(uint32_t x_uL)
 #ifdef DushuModule
 	int32_t target_position = Motor[4].StepPosition - (x_uL * 8 * Motor[4].mircro_steps) ;
 #endif
+#ifndef WeiLiuKong
 	if(target_position < 0){
 		printf("[WRONG]Push out Number Overflow!\r\n Maximum Number:%ld uL\r\n",Motor[4].StepPosition/Motor[4].mircro_steps/2);
 		return FAIL;
@@ -942,10 +943,11 @@ uint8_t Motor4_PushOutMode(uint32_t x_uL)
 		return FAIL;
 	}
 	MotorMove_position(&Motor[4], target_position );
+#endif
 	return SUCCESS;
 }
 
-/*            *****************    0x10-0b00010000 电机参数控制模式 ：  ******************
+/*            *****************    0x10-0b00010000 直流电机控制模式 ：  ******************
 根据协议，通过USART5进行出串口通讯，输入直流电机的【编号、AB相、占空比】参数
 Status - 0x02 代表A相使能，0x01代表B相使能。同一个电机的AB相占空比一致 ***/
 void DC_Motor_ON(struct MotorDefine *temp ,char x, uint32_t Duty_Cycle)

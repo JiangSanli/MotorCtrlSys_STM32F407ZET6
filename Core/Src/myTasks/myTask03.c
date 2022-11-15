@@ -80,9 +80,9 @@ void StartTask03(void *argument)
 
 		case 3:
 			Motor4_SuckInMode(500);
-			osDelay(300);
+			osDelay(1000);
 			Motor4_PushOutMode(500);
-			osDelay(300);
+			osDelay(1000);
 			myTask03_Status=4;
 			break;
 
@@ -121,7 +121,7 @@ void StartTask03(void *argument)
 			OUT4_ON();
 			osDelay(50);
 			DC_Motor_ON(&Motor[7],'A',40);
-			MotorMove_position(&Motor[2],7000) ;
+			MotorMove_position(&Motor[2],7300) ;
 			osDelay(2000);
 			if (Motor[2].Status == 0){myTask03_Status=10;}
 			break;
@@ -132,7 +132,7 @@ void StartTask03(void *argument)
 			OUT4_OFF();
 			MotorMove_position(&Motor[2],-20) ;
 			osDelay(CiFenLi_KeepStatic_time);
-			if (Motor[2].Status == 0){myTask03_Status=0;}
+			if (Motor[2].Status == 0){myTask03_Status=2;}
 			break;
 
 		case INITFAILSTATE:
@@ -471,10 +471,10 @@ void StartTask03(void *argument)
 
 
 		case 20:
-			DetectionTask_STATE = Cap0_Sample_State;
-			printf("---Enter Liquid following mode---\r\n");
-			Motor[3].Status = 1;
-			HAL_TIM_Base_Start_IT(Motor[3].htim_x);
+			DetectionTask_STATE = 70;
+			printf("---Capture Cap Value Begin---\r\n");
+//			Motor[3].Status = 1;
+//			HAL_TIM_Base_Start_IT(Motor[3].htim_x);
 			myTask03_Status = INITPASSSTATE;
 			break;
 
@@ -506,13 +506,15 @@ void StartTask03(void *argument)
 
 	Motor_Data_Init();
 	osDelay(100);
-	if ( 0b00110000 == ALL_Motors_Init(0b00110000) ){
-		printf("Motors Initialization Completed! \r\n");
-		myTask03_Status = INITPASSSTATE;
-	}
-	else{
-		myTask03_Status = INITFAILSTATE;
-	}
+//	if ( 0b00110000 == ALL_Motors_Init(0b00110000) ){
+//		printf("Motors Initialization Completed! \r\n");
+//		myTask03_Status = INITPASSSTATE;
+//	}
+//	else{
+//		myTask03_Status = INITFAILSTATE;
+//	}
+	VM6_Enable_A();	VM6_Enable_B();
+	myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -626,7 +628,6 @@ void StartTask03(void *argument)
 	else{
 		myTask03_Status = INITFAILSTATE;
 	}
-	//myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -669,20 +670,20 @@ void StartTask03(void *argument)
 
 		case 10:	//	KEY0： 灌注液体 吸液200uL-注液200uL，过程中不进行延时和读数
 			if (Motor[4].Status == 0){
-				Motor4_SuckInMode(200);
+				Motor4_SuckInMode(100);
 				myTask03_Status = 11;
 			}
 			osDelay(10);
 			break;
 		case 11:
 			if (Motor[4].Status == 0){
-				Motor4_PushOutMode(200);
+				Motor4_PushOutMode(100);
 				myTask03_Status=INITPASSSTATE;
 			}
 			osDelay(10);
 			break;
 
-		case 20:	//	KEY1： 直接读书7秒，不进行洗液和注液
+		case 20:	//	KEY1： 直接读书10秒，不进行洗液和注液
 			printf("-7\n");
 			osDelay(50);
 			CH297_Module_START();
@@ -719,8 +720,8 @@ void StartTask03(void *argument)
 			myTask03_Status=33;
 			break;
 		case 33:
-			//osDelay(10000);
-			osDelay(60000);
+			osDelay(10000);
+			//osDelay(60000);
 			CH297_Module_STOP();
 			osDelay(50);
 			printf("-1\n");

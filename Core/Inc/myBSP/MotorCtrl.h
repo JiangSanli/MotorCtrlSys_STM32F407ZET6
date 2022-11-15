@@ -12,8 +12,8 @@
 //#define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
 //#define RZ_stepmotor	// RZ步进电机
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
-//#define WeiLiuKong		// 微流控小5V步进电机
-#define DushuModule
+#define WeiLiuKong		// 微流控小5V步进电机
+//#define DushuModule		// PMT读数模块
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
