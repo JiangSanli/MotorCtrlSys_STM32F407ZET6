@@ -35,9 +35,11 @@ void deal_buffer_motorCtrl_data(struct MotorDefine *a)
 		a->MotorDirection = 0 ;
 	}
 
-	a->DesiredSpeedInRads =  (float)USART5_RX_BUF[4] / 10;
+	//a->DesiredSpeedInRads =  (float)USART5_RX_BUF[4] / 10;
+	a->DesiredSpeedInRads =  (float)USART5_RX_BUF[4] ;
 	a->NumberofRads = (float)USART5_RX_BUF[5] + (float)USART5_RX_BUF[6] / 100 ;
-	a->StartupSpeedInRads = (float)USART5_RX_BUF[7] / 10 ;
+	//a->StartupSpeedInRads = (float)USART5_RX_BUF[7] / 10 ;
+	a->StartupSpeedInRads =  (float)USART5_RX_BUF[7] ;
 	a->accelerationRate = USART5_RX_BUF[8] * 100 ;
 	a->decelerationRate = USART5_RX_BUF[9] * 100 ;
 

@@ -183,7 +183,7 @@ void Motor_Data_Init(void)
 	Motor[6].htim_x = &htim12,
 
 	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
-	Motor[6].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/1000=100Hz
+	Motor[6].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/400=250Hz
 	Motor[6].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
 	Motor[6].AccelerationTimeTMR = Motor[6].StepperSpeedTMR ; // 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
 
@@ -193,11 +193,30 @@ void Motor_Data_Init(void)
 	Motor[7].htim_x = &htim12,
 
 	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
-	Motor[7].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/100=1KHz
+	Motor[7].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/400=250Hz
 	Motor[7].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
 	Motor[7].AccelerationTimeTMR = Motor[7].StepperSpeedTMR ; 	// 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
 #endif
+
+#ifdef L298N_StepMotorCtrl
+/*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动   */
+	Motor[6].MotorNumber = 6;
+	Motor[6].Status = 0;
+	Motor[6].htim_x = &htim7;
+	//机械参数
+	Motor[6].deceleration_ratio = 1;
+	Motor[6].step_angle = 18;
+	Motor[6].mircro_steps = 8;
+	Motor[6].MaxSpeedInRads= 60;
+	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+	Motor[6].StartupSpeedInRads = 20;
+	Motor[6].DesiredSpeedInRads = 30;
+	Motor[6].accelerationRate = 30000;
+	Motor[6].decelerationRate = 20000;
+#endif
 }
+
+
 
 void Motor5_AB(void) // 电机5状态1
 {VM5_IN1_H();	VM5_IN2_L();	VM5_IN3_H()	;	VM5_IN4_L();}
@@ -218,10 +237,22 @@ void Motor6_ab(void) // 电机6状态3
 {VM6_IN1_L();	VM6_IN2_H();	VM6_IN3_L()	;	VM6_IN4_H();}
 void Motor6_Ab(void) // 电机6状态4
 {VM6_IN1_H();	VM6_IN2_L();	VM6_IN3_L()	;	VM6_IN4_H();}
+void Motor6_A(void)
+{VM6_IN1_H();	VM6_IN2_L();}
+void Motor6_a(void)
+{VM6_IN1_L();	VM6_IN2_H();}
+void Motor6_B(void)
+{VM6_IN3_H();	VM6_IN4_L();}
+void Motor6_b(void)
+{VM6_IN3_L();	VM6_IN4_H();}
+void Motor6_A_release(void)
+{VM6_IN1_L();	VM6_IN2_L();}
+void Motor6_B_release(void)
+{VM6_IN3_L();	VM6_IN4_L();}
 void Motor6_Release(void) // 电机6释放锁定
 {VM6_IN1_L();	VM6_IN2_L();	VM6_IN3_L()	;	VM6_IN4_L();}
 
-void Motor7_AB(void) // 电机6状态1
+void Motor7_AB(void) // 电机7状态1
 {VM7_IN1_H();	VM7_IN2_L();	VM7_IN3_H()	;	VM7_IN4_L();}
 void Motor7_aB(void) // 电机7状态2
 {VM7_IN1_L();	VM7_IN2_H();	VM7_IN3_H()	;	VM7_IN4_L();}
@@ -280,6 +311,7 @@ uint8_t ALL_Motors_Init(uint8_t Motor_Num)
 {
 	uint8_t Motor_Init_Result = 0 ;
 	printf("Reseting Motors:0x%x ...\r\n",Motor_Num);
+#ifdef JiaYangZhen
 	if ( Motor_Num & 0b00000001 ){
 		Motor1_Enable();
 		if ( Motor_Reset(&Motor[1]) ){
@@ -300,6 +332,29 @@ uint8_t ALL_Motors_Init(uint8_t Motor_Num)
 			Motor_Init_Result = Motor_Init_Result | 0b00000010 ;
 		}
 	}
+#else
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00000100 ){
+		Motor3_Enable();
+		if ( Motor_Reset(&Motor[3]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00000100 ;
+		}
+	}
+	HAL_Delay(MotorInitDelay);
+	if ( Motor_Num & 0b00000010 ){
+		Motor2_Enable();
+		if ( Motor_Reset(&Motor[2]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00000010 ;
+		}
+	}
+	if ( Motor_Num & 0b00000001 ){
+		Motor1_Enable();
+		if ( Motor_Reset(&Motor[1]) ){
+			Motor_Init_Result = Motor_Init_Result | 0b00000001 ;
+		}
+	}
+#endif
+
 	HAL_Delay(MotorInitDelay);
 	if ( Motor_Num & 0b00001000 ){
 		Motor4_Enable();
@@ -465,6 +520,7 @@ void MotorMove_steps(struct MotorDefine *temp)
 	if(temp->DesiredSpeedInRads > temp->MaxSpeedInRads)  // 判断电机设置速度是否超过最大转速
 	{
 		printf("[WRONG] Setup Speed faster than max speed:%.2f rad/s !\r\n",temp->MaxSpeedInRads);
+		Motor[temp->MotorNumber].Status = 0 ;
 		return ;
 	}
 
@@ -879,15 +935,15 @@ uint8_t Motor4_SuckInMode(uint32_t x_uL)  // 电机4最大排量1000uL，总行�
 #endif
 	HAL_Delay(300);
 	//printf("Motor4_Sucks in %lduL...\r\n", x_uL);
-
+	int32_t target_steps = 0 ;
 #ifdef CiFenLi
-	int32_t target_steps = x_uL * 2 * Motor[4].mircro_steps ;
+	target_steps = x_uL * 2 * Motor[4].mircro_steps ;
 #endif
 #ifdef JiaYangZhen
-	int32_t target_steps = x_uL * 8 * Motor[4].mircro_steps ;
+	target_steps = x_uL * 8 * Motor[4].mircro_steps ;
 #endif
 #ifdef DushuModule
-	int32_t target_steps = x_uL * 8 * Motor[4].mircro_steps ;
+	target_steps = x_uL * 8 * Motor[4].mircro_steps ;
 #endif
 	if(Motor[4].Status == 1){
 		return FAIL;
@@ -904,9 +960,8 @@ uint8_t Motor4_SuckInMode(uint32_t x_uL)  // 电机4最大排量1000uL，总行�
 			return FAIL;
 		}
 	}
-#ifndef WeiLiuKong
 	MotorMove_position(&Motor[4], target_steps );
-#endif
+
 	return SUCCESS;
 }
 
@@ -925,16 +980,17 @@ uint8_t Motor4_PushOutMode(uint32_t x_uL)
 #endif
 	HAL_Delay(300);
 	//printf("Motor4_Pushs out uL...\r\n");
+	int32_t target_position = 0 ;
 #ifdef CiFenLi
-	int32_t target_position = Motor[4].StepPosition - (x_uL * 2 * Motor[4].mircro_steps) ;
+	target_position = Motor[4].StepPosition - (x_uL * 2 * Motor[4].mircro_steps) ;
 #endif
 #ifdef JiaYangZhen
-	int32_t target_position = Motor[4].StepPosition - (x_uL * 8 * Motor[4].mircro_steps) ;
+	target_position = Motor[4].StepPosition - (x_uL * 8 * Motor[4].mircro_steps) ;
 #endif
 #ifdef DushuModule
-	int32_t target_position = Motor[4].StepPosition - (x_uL * 8 * Motor[4].mircro_steps) ;
+	target_position = Motor[4].StepPosition - (x_uL * 8 * Motor[4].mircro_steps) ;
 #endif
-#ifndef WeiLiuKong
+
 	if(target_position < 0){
 		printf("[WRONG]Push out Number Overflow!\r\n Maximum Number:%ld uL\r\n",Motor[4].StepPosition/Motor[4].mircro_steps/2);
 		return FAIL;
@@ -943,7 +999,7 @@ uint8_t Motor4_PushOutMode(uint32_t x_uL)
 		return FAIL;
 	}
 	MotorMove_position(&Motor[4], target_position );
-#endif
+
 	return SUCCESS;
 }
 

@@ -384,7 +384,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					USART_RX_STA++;
 				}
 			}
-			else{							// 如果没有收到起始位
+			else{							// 如果没有收到起始�?
 				if(aRxBuffer[0]==0xAA){
 					USART_RX_STA|=0x4000;
 					USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;

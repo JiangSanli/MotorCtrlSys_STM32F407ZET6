@@ -7,15 +7,13 @@
 #include "stdio.h"
 #include "string.h"
 
-//struct turntable {		// 定义转盘参数的结构体
-//	int32_t		position;		// 减速比
-//
-//};
-//
-//extern struct MotorDefine turntable[14];
 
 extern uint32_t TPMark[14];
 
+extern int Motor6_MicroSteps[32][3];
+extern uint16_t Motor6_MicroSteps_Increment ;
+
 void Turntable_Position_Init(void);
+void Motor6_MicroSteps_Table_Init(void);
 
 #endif

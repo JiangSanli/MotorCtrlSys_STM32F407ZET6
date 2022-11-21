@@ -92,7 +92,7 @@ void StartTask03(void *argument)
 			break;
 
 		case 5:
-			DC_Motor_ON(&Motor[6],'A',95);
+			DC_Motor_ON(&Motor[6],'A',85);
 			osDelay(2000);
 			DC_Motor_OFF(&Motor[6],'A');
 			osDelay(1000);
@@ -120,7 +120,7 @@ void StartTask03(void *argument)
 		case 9:
 			OUT4_ON();
 			osDelay(50);
-			DC_Motor_ON(&Motor[7],'A',40);
+			DC_Motor_ON(&Motor[7],'A',20);
 			MotorMove_position(&Motor[2],7300) ;
 			osDelay(2000);
 			if (Motor[2].Status == 0){myTask03_Status=10;}
@@ -506,15 +506,13 @@ void StartTask03(void *argument)
 
 	Motor_Data_Init();
 	osDelay(100);
-//	if ( 0b00110000 == ALL_Motors_Init(0b00110000) ){
-//		printf("Motors Initialization Completed! \r\n");
-//		myTask03_Status = INITPASSSTATE;
-//	}
-//	else{
-//		myTask03_Status = INITFAILSTATE;
-//	}
-	VM6_Enable_A();	VM6_Enable_B();
-	myTask03_Status = INITPASSSTATE;
+	if ( 0b00110000 == ALL_Motors_Init(0b00110000) ){
+		printf("Motors Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
 
 	for(;;)
 	{
@@ -740,3 +738,89 @@ void StartTask03(void *argument)
 
 }
 #endif
+
+#ifdef L298N_StepMotorCtrl
+void StartTask03(void *argument)
+{
+	osDelay(10);
+	printf("myTask03 starts! \r\n");
+
+	Motor_Data_Init();
+	VM6_Enable_A();	VM6_Enable_B();
+	Motor6_Release();
+	Motor6_MicroSteps_Table_Init();
+	myTask03_Status = INITPASSSTATE;
+
+	for(;;)
+	{
+		osDelay(1);
+		switch (myTask03_Status)
+		{
+		case INITPASSSTATE:
+			osDelay(10);
+			if(KEY0_Pressed())
+			{
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					myTask03_Status = 10;
+				}
+			}
+			if(KEY1_Pressed())
+			{
+				osDelay(20);
+				if(KEY1_Pressed())
+				{
+					osDelay(20);
+					while (KEY1_Pressed()){osDelay(1);}
+					myTask03_Status = 20;
+				}
+			}
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 30;
+				}
+			}
+			break;
+
+		case 10:
+			Start_DMA_ADC1_CH10CH11();
+			myTask03_Status = INITPASSSTATE;
+			break;
+
+		case 20:
+			for (uint16_t i=0 ; i<30 ; i++){
+				printf("\t***ADC1 Values: %d, %d ***\r\n",get_ADC1_Current_Phase(0),get_ADC1_Current_Phase(1));
+				//printf("\t***ADC1 Values: %d, %d ***\r\n",ADC_Values[0],ADC_Values[1]);
+				osDelay(200);
+			}
+			myTask03_Status = INITPASSSTATE;
+			break;
+
+		case 30:
+			STOP_DMA_ADC1_CH10CH11();
+			myTask03_Status = INITPASSSTATE;
+			break ;
+
+		}
+	}
+
+}
+#endif
+
+
+
+
+
+
+
+
+
+

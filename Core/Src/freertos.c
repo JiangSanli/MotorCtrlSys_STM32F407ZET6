@@ -205,7 +205,7 @@ __weak void StartDetectionTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(10000);
   }
   /* USER CODE END StartDetectionTask */
 }

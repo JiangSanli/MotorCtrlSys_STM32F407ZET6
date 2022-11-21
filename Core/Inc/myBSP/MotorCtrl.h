@@ -3,6 +3,8 @@
 #define __MOTORCTRL_H__
 
 #include "main.h"
+#include "myADC.h"
+#include "MotorCtrl.h"
 
 #define MOTORTIM_TMR 100000			 		// 设定STM32F4单片机计时器中断频率为100kHz
 #define Encoder2_0position_number 1000		//编码器2:设定0位编码器的计数值，便于对负数进行计算
@@ -12,8 +14,9 @@
 //#define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
 //#define RZ_stepmotor	// RZ步进电机
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
-#define WeiLiuKong		// 微流控小5V步进电机
+//#define WeiLiuKong		// 微流控小5V步进电机
 //#define DushuModule		// PMT读数模块
+#define L298N_StepMotorCtrl
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
@@ -125,6 +128,12 @@ void Motor6_AB(void);
 void Motor6_aB(void);
 void Motor6_ab(void);
 void Motor6_Ab(void);
+void Motor6_A(void);
+void Motor6_a(void);
+void Motor6_B(void);
+void Motor6_b(void);
+void Motor6_A_release(void) ;
+void Motor6_B_release(void) ;
 void Motor6_Release(void);
 void Motor7_AB(void);
 void Motor7_aB(void);
@@ -133,3 +142,5 @@ void Motor7_Ab(void);
 void Motor7_Release(void);
 
 #endif
+
+

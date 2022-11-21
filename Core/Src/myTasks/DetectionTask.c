@@ -21,14 +21,15 @@
 #include "ScheduleTable.h"
 #include "FDC2112.h"
 
+uint8_t Follow_state ;
+uint8_t DetectionTask_STATE ;
+
+#ifdef JiaYangZhen
+
 float Cap_Value[2] ;    		// 直接读出并转换的电容值
 float Cap_Value_Calibrated[2] ;	// 校准后的电容值，正常状态下为0
 float Calibration_Value[2] ;	// 校准值，为常规状态下的电容值均值，计算绝对电容值需要减去该值
 
-uint8_t Follow_state ;
-uint8_t DetectionTask_STATE ;
-
-#ifndef DushuModule
 uint8_t init_Calibration_Value(uint8_t index)
 {
 	Calibration_Value[index] = 0;
@@ -75,7 +76,7 @@ void StartDetectionTask(void *argument)
 
 	Init_DoubleChannel_FDC2212();
 	osDelay(100);
-	//DetectionTask_STATE = init_Calibration_Value(0);
+	DetectionTask_STATE = init_Calibration_Value(0);
 	osDelay(100);
 	DetectionTask_STATE = INITPASSSTATE;
 
@@ -164,7 +165,8 @@ void StartDetectionTask(void *argument)
 
 }
 
-#else
+#endif
+#ifdef DushuModule
 
 uint8_t CH297_SampleTime[] = "T5\r\n" ;
 uint8_t CH297_Start[] = "S\r\n" ;
@@ -245,5 +247,6 @@ void StartDetectionTask(void *argument)
 	}
 }
 #endif
+
 
 

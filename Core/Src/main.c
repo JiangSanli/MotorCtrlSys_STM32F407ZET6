@@ -99,7 +99,29 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_CAN1_Init();
+  MX_USART1_UART_Init();
+  MX_DAC_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
+  MX_TIM4_Init();
+  MX_UART4_Init();
+  MX_UART5_Init();
+  MX_USART3_UART_Init();
+  MX_ADC1_Init();
+  MX_ADC2_Init();
+  MX_I2C2_Init();
+  MX_TIM10_Init();
+  MX_TIM11_Init();
+  MX_TIM13_Init();
+  MX_TIM14_Init();
+  MX_TIM9_Init();
+  MX_TIM7_Init();
+  MX_TIM6_Init();
+  MX_TIM12_Init();
+#ifdef XXX
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -126,7 +148,7 @@ int main(void)
   MX_TIM6_Init();
   MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
-
+#endif
   ALL_Motors_Disable();
 
   /* USER CODE END 2 */
@@ -215,7 +237,7 @@ uint32_t AccelDecelcount_TIM6 = 0;
 uint8_t  Motor5_State = 1 ;
 uint32_t timecount_TIM7 = 0;
 uint32_t AccelDecelcount_TIM7 = 0;
-uint8_t  Motor6_State = 1 ;
+int  Motor6_State = 0 ;
 //直流电机控制
 uint32_t timecount_TIM12_DCM6 = 0 ;
 uint32_t timecount_TIM12_DCM7 = 0 ;
@@ -384,6 +406,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				Motor[3].Status = 0;
 				HAL_TIM_Base_Stop_IT(&htim13);
 			}
+#ifdef JiaYangZhen
 			if (DetectionTask_STATE == Cap0_Sample_State){
 				switch (Follow_state){
 				case 1:
@@ -396,13 +419,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					if(timecount_TIM13 >= Motor[3].StepperSpeedTMR){
 						timecount_TIM13 = 0 ;
 #ifndef JiaYangZhen_EncoderMode
-							Motor[3].StepPosition++;
+						Motor[3].StepPosition++;
 #endif
 					}
 					break;
 				case 2:
 					timecount_TIM13 = 0 ;
-					//使用IO输出模块进行液面检测
+					//使用IO输出模块进行液面�????????�????????
 //					HAL_TIM_Base_Stop_IT(&htim13);
 //					Motor[3].Status = 0;
 					break;
@@ -422,7 +445,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					break;
 				}
 			}
-			else{
+			else
+#endif
+			{
 				if(timecount_TIM13 <= Pluse_High){
 					Motorpluse3_High();
 				}
@@ -504,7 +529,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				HAL_TIM_Base_Stop_IT(&htim14);
 			}
 
-			if (Motor[4].NumberofSteps > Motor[4].NumberofSteps_StopAccel)  // 如果剩余行进步数大于停止加�?�步数标志，启动加�??
+			if (Motor[4].NumberofSteps > Motor[4].NumberofSteps_StopAccel)
 			{
 				if(AccelDecelcount_TIM14 >= Motor[4].AccelerationTimeTMR)
 				{
@@ -512,7 +537,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					AccelDecel(ACCEL,&Motor[4]);
 				}
 			}
-			else if (Motor[4].NumberofSteps < Motor[4].NumberofSteps_BeginDecel)  // 如果剩余行进步数小于在开始减速步数标志，启动减�??
+			else if (Motor[4].NumberofSteps < Motor[4].NumberofSteps_BeginDecel)
 			{
 				if(AccelDecelcount_TIM14 >= Motor[4].DecelerationTimeTMR)
 				{
@@ -608,6 +633,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 	}
 
+#ifndef L298N_StepMotorCtrl
 	else if (htim->Instance == TIM7)
 	{
 			timecount_TIM7++;
@@ -694,6 +720,103 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 			}
 	}
+#else
+	else if (htim->Instance == TIM7)
+	{
+			timecount_TIM7++;
+			AccelDecelcount_TIM7++;
+
+			if ( get_ADC1_Current_Phase(0) < (abs(Motor6_MicroSteps[Motor6_State][1])*VM6_Full_Current) ){
+				if ( Motor6_MicroSteps[Motor6_State][1] > 0 ){
+					Motor6_A();
+					LED0_ON();
+				}else{
+					Motor6_a();
+					LED0_OFF();
+				}
+			}else{
+				Motor6_A_release();
+//				if ( Motor6_MicroSteps[Motor6_State][1] > 0 ){
+//					Motor6_a();
+//					LED0_OFF();
+//				}else{
+//					Motor6_A();
+//					LED0_ON();
+//				}
+			}
+
+			if ( get_ADC1_Current_Phase(1) < (abs(Motor6_MicroSteps[Motor6_State][2])*VM6_Full_Current) ){
+				if ( Motor6_MicroSteps[Motor6_State][2] > 0 ){
+					Motor6_B();
+					LED1_ON();
+				}else{
+					Motor6_b();
+					LED1_OFF();
+				}
+			}else{
+				Motor6_B_release();
+//				if ( Motor6_MicroSteps[Motor6_State][2] > 0 ){
+//					Motor6_b();
+//					LED1_OFF();
+//				}else{
+//					Motor6_B();
+//					LED1_ON();
+//				}
+			}
+
+			if(timecount_TIM7 >= Motor[6].StepperSpeedTMR)
+			{
+				timecount_TIM7 = 0 ;
+				Motor[6].NumberofSteps--;
+
+				if (Motor[6].MotorDirection == 1){
+					Motor6_State += Motor6_MicroSteps_Increment ;
+					if ( Motor6_State > 31 ){
+						Motor6_State = 0;
+					}
+				}
+				else{
+					Motor6_State -= Motor6_MicroSteps_Increment;
+					if ( Motor6_State < 0 ){
+						Motor6_State = 32 - Motor6_MicroSteps_Increment;
+					}
+				}
+
+				if (Motor[6].MotorDirection == 1){
+					Motor[6].StepPosition++;
+				}
+				else{
+					Motor[6].StepPosition--;
+				}
+
+				if(Motor[6].StepPosition == Motor[6].TargetPosition){
+					Motor[6].Status = 0;
+					Motor6_Release();
+					printf("---Motor[6] Steps Position:%ld---\r\n",Motor[6].StepPosition);
+					HAL_TIM_Base_Stop_IT(&htim7);
+				}
+				else if (Motor[6].NumberofSteps <= 0){
+					Motor[6].Status = 0;
+					Motor6_Release();
+					printf("[WRONG]Motor6 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[6].StepPosition);
+					HAL_TIM_Base_Stop_IT(&htim7);
+				}
+			}
+
+			if (Motor[6].NumberofSteps > Motor[6].NumberofSteps_StopAccel){
+				if(AccelDecelcount_TIM7 >= Motor[6].AccelerationTimeTMR){
+					AccelDecelcount_TIM7=0;
+					AccelDecel(ACCEL,&Motor[6]);
+				}
+			}
+			else if (Motor[6].NumberofSteps < Motor[6].NumberofSteps_BeginDecel){
+				if(AccelDecelcount_TIM7 >= Motor[6].DecelerationTimeTMR){
+					AccelDecelcount_TIM7=0;
+					AccelDecel(DECEL,&Motor[6]);
+				}
+			}
+	}
+#endif
 
 #ifdef WeiLiuKong
 	else if (htim->Instance == TIM12)

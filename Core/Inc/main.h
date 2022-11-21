@@ -36,6 +36,8 @@ extern "C" {
 #include "string.h"
 #include "tim.h"
 #include "FDC2112.h"
+#include "ScheduleTable.h"
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
