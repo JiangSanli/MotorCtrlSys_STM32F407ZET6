@@ -479,10 +479,13 @@ void StartTask03(void *argument)
 			break;
 
 		case 30:
-			HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
-			Motor[3].Status = 0;
-			DetectionTask_STATE = INITPASSSTATE;
-			printf("---Checking following mode Over!---\r\n");
+			OUT1_ON();	// 加样针外壁清洗排除液体电磁阀
+			OUT2_ON();	// 加样针外壁清洗注入液体电磁阀
+			OUT5_ON();	// 柱塞泵加入液体电磁阀
+//			HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
+//			Motor[3].Status = 0;
+//			DetectionTask_STATE = INITPASSSTATE;
+//			printf("---Checking following mode Over!---\r\n");
 			myTask03_Status = INITPASSSTATE;
 			break;
 
@@ -627,6 +630,7 @@ void StartTask03(void *argument)
 		myTask03_Status = INITFAILSTATE;
 	}
 
+
 	for(;;)
 	{
 		osDelay(1);
@@ -746,6 +750,7 @@ void StartTask03(void *argument)
 	printf("myTask03 starts! \r\n");
 
 	Motor_Data_Init();
+	VM5_Enable_A();	VM5_Enable_B();
 	VM6_Enable_A();	VM6_Enable_B();
 	Motor6_Release();
 	Motor6_MicroSteps_Table_Init();
@@ -816,10 +821,137 @@ void StartTask03(void *argument)
 #endif
 
 
+#ifdef DuoTongDao
+void StartTask03(void *argument)
+{
+	osDelay(10);
+	printf("myTask03 starts! \r\n");
+
+	Motor_Data_Init();
+	Vertical_Position_Init();
+	osDelay(100);
+	if ( 0b00000110 == ALL_Motors_Init(0b00000110) ){
+		printf("Motors Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
+	VM5_Enable_A();	VM5_Enable_B();
+	VM6_Enable_A();	VM6_Enable_B();
+	uint8_t motor2_next_state = 10;
+	uint8_t motor3_next_state = 20;
+
+//	Motor2_Enable();
+//	Motor3_Enable();
+//	myTask03_Status = INITPASSSTATE;
+
+	for(;;)
+	{
+		osDelay(1);
+		switch (myTask03_Status)
+		{
+		case INITPASSSTATE:
+			osDelay(10);
+			if(KEY0_Pressed())
+			{
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					myTask03_Status = motor2_next_state;
+					printf("Key0 pressed!\r\n");
+				}
+			}
+			if(KEY1_Pressed())
+			{
+				osDelay(20);
+				if(KEY1_Pressed())
+				{
+					osDelay(20);
+					while (KEY1_Pressed()){osDelay(1);}
+					myTask03_Status = motor3_next_state;
+					printf("Key1 pressed!\r\n");
+				}
+			}
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 30;
+					printf("Key2 pressed!\r\n");
+				}
+			}
+			break;
+
+		case 10:
+			if (Motor[2].Status == 0){
+				MotorMove_position(&Motor[2],VPMark[0]);
+				motor2_next_state = 11;
+				myTask03_Status=INITPASSSTATE;
+			}
+			break;
+
+		case 11:
+			if (Motor[2].Status == 0){
+				MotorMove_position(&Motor[2],VPMark[2]);
+				motor2_next_state = 12;
+				myTask03_Status=INITPASSSTATE;
+			}
+			break;
+
+		case 12:
+			if (Motor[2].Status == 0){
+				MotorMove_position(&Motor[2],-16);
+				motor2_next_state = 10 ;
+				myTask03_Status=INITPASSSTATE;
+			}
+			break;
+
+		case 20:
+			if (Motor[3].Status == 0){
+				MotorMove_position(&Motor[3],19200); //刚好推进试剂储藏处
+				motor3_next_state = 21 ;
+				myTask03_Status=INITPASSSTATE;
+			}
+			break;
+
+		case 21:
+			if (Motor[3].Status == 0){
+				MotorMove_position(&Motor[3],-16);
+				motor3_next_state = 20 ;
+				myTask03_Status=INITPASSSTATE;
+			}
+			break;
+
+		case 30:
+			if (Motor[3].Status == 0){
+				MotorMove_position(&Motor[3],61680);
+				motor3_next_state = 22 ;
+				myTask03_Status=INITPASSSTATE;
+			}
+			break;
 
 
 
 
+
+		case INITFAILSTATE:
+			printf("[WRONG]Motors Initialization FAILED!Please Check!\r\n");
+			osDelay(10000);
+			break;
+		}
+	}
+}
+
+
+
+
+#endif
 
 
 

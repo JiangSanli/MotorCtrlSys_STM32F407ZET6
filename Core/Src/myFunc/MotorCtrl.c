@@ -49,15 +49,15 @@ void Motor_Data_Init(void)
 	Motor[1].Status = 0,
 	Motor[1].htim_x = &htim10,
 	//机械参数
-	Motor[1].deceleration_ratio = 2;
+	Motor[1].deceleration_ratio = 1;
 	Motor[1].step_angle = 1.8;
 	Motor[1].mircro_steps = 16;
 	Motor[1].MaxSpeedInRads= 25;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[1].StartupSpeedInRads = 0.6;
 	Motor[1].DesiredSpeedInRads = 8;
-	Motor[1].accelerationRate = 5000;
-	Motor[1].decelerationRate = 3600;
+	Motor[1].accelerationRate = 20000;
+	Motor[1].decelerationRate = 20000;
 
 /*  Motor2: 加样针水平方向步进电机，4细分800步每圈，编码器为1000P/R */
 	Motor[2].MotorNumber = 2;
@@ -90,6 +90,70 @@ void Motor_Data_Init(void)
 	Motor[3].DesiredSpeedInRads = 10;
 	Motor[3].accelerationRate = 9000;
 	Motor[3].decelerationRate = 6000;
+#endif
+
+#ifdef DuoTongDao
+	/*  Motor2: 多通道垂直方向步进电机，编码器为1000P/R */
+		Motor[2].MotorNumber = 2;
+		Motor[2].Status = 0,
+		Motor[2].htim_x = &htim11,
+		//机械参数
+		Motor[2].deceleration_ratio = 1;
+		Motor[2].step_angle = 1.8;
+		Motor[2].mircro_steps = 16;
+		Motor[2].MaxSpeedInRads= 25;
+		//Motor[2].Encoder_PulsePerRad = 1000;
+		//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+		Motor[2].StartupSpeedInRads = 2;
+		Motor[2].DesiredSpeedInRads = 10;
+		Motor[2].accelerationRate = 20000;
+		Motor[2].decelerationRate = 20000;
+
+	/*  Motor3: 编码器水平方向步进电机  */
+		Motor[3].MotorNumber = 3;
+		Motor[3].Status = 0,
+		Motor[3].htim_x = &htim13,
+		//机械参数
+		Motor[3].deceleration_ratio = 1;
+		Motor[3].step_angle = 1.8;
+		Motor[3].mircro_steps = 16;
+		Motor[3].MaxSpeedInRads= 25;
+		//Motor[2].Encoder_PulsePerRad = 1000;
+		//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+		Motor[3].StartupSpeedInRads = 2;
+		Motor[3].DesiredSpeedInRads = 8;
+		Motor[3].accelerationRate = 16000;
+		Motor[3].decelerationRate = 16000;
+
+	/*  Motor5 : 推杆旋转电机   */
+		Motor[5].MotorNumber = 5;
+		Motor[5].Status = 0,
+		Motor[5].htim_x = &htim6,
+		//机械参数
+		Motor[5].deceleration_ratio = 1;
+		Motor[5].step_angle = 18;
+		Motor[5].mircro_steps = 1;
+		Motor[5].MaxSpeedInRads= 60;
+		//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+		Motor[5].StartupSpeedInRads = 1;
+		Motor[5].DesiredSpeedInRads = 5;
+		Motor[5].accelerationRate = 6000;
+		Motor[5].decelerationRate = 4000;
+
+	/*  Motor6 : 试剂条暂存电机   */
+		Motor[6].MotorNumber = 6;
+		Motor[6].Status = 0,
+		Motor[6].htim_x = &htim7,
+		//机械参数
+		Motor[6].deceleration_ratio = 1;
+		Motor[6].step_angle = 18;
+		Motor[6].mircro_steps = 1;
+		Motor[6].MaxSpeedInRads= 60;
+		//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+		Motor[6].StartupSpeedInRads = 10;
+		Motor[6].DesiredSpeedInRads = 20;
+		Motor[6].accelerationRate = 6000;
+		Motor[6].decelerationRate = 4000;
 #endif
 
 /*  Motor4 : 柱塞泵，负责注液（也可以抽液），最大排量1000uL，总行程10rads（2000步），每步0.5uL  */
@@ -142,8 +206,8 @@ void Motor_Data_Init(void)
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[5].StartupSpeedInRads = 1;
 	Motor[5].DesiredSpeedInRads = 5;
-	Motor[5].accelerationRate = 2000;
-	Motor[5].decelerationRate = 1000;
+	Motor[5].accelerationRate = 6000;
+	Motor[5].decelerationRate = 4000;
 
 /*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动   */
 	Motor[6].MotorNumber = 6;
@@ -157,8 +221,8 @@ void Motor_Data_Init(void)
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[6].StartupSpeedInRads = 2.5;
 	Motor[6].DesiredSpeedInRads = 10;
-	Motor[6].accelerationRate = 2000;
-	Motor[6].decelerationRate = 1000;
+	Motor[6].accelerationRate = 6000;
+	Motor[6].decelerationRate = 4000;
 
 /*  Motor7 : 微流控5V小电机-直线电机，水平横向运动   */
 	Motor[7].MotorNumber = 7;
@@ -773,7 +837,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 			MotorRun_LowSpeed(temp);
 			for(uint32_t i=0 ; Motor2_Nreset_OPTstatus ; i++){
 				if(i>5000) {
-					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					printf("[WRONG]Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
@@ -857,7 +921,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor5_reset_OPTstatus ; i++){
 				if(i>500) {
-					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					printf("[WRONG]Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
@@ -871,7 +935,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 			MotorRun_LowSpeed(temp);
 			for(uint32_t i=0 ; Motor5_Nreset_OPTstatus ; i++){
 				if(i>1000) {
-					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					printf("[WRONG]Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
@@ -890,7 +954,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor6_reset_OPTstatus ; i++){
 				if(i>500) {
-					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					printf("[WRONG]1Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}
@@ -905,7 +969,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 			MotorMove_steps(temp);
 			for(uint32_t i=0 ; Motor6_Nreset_OPTstatus ; i++){
 				if(i>5000) {
-					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
+					printf("[WRONG]2Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
 				}

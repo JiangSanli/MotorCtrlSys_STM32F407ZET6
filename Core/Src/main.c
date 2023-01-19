@@ -43,7 +43,7 @@
 
 PUTCHAR_PROTOTYPE
 {
-	HAL_UART_Transmit(&huart3, (uint8_t*)&ch,1,HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)&ch,1,HAL_MAX_DELAY);
     return ch;
 }
 /* USER CODE END PTD */
@@ -237,7 +237,12 @@ uint32_t AccelDecelcount_TIM6 = 0;
 uint8_t  Motor5_State = 1 ;
 uint32_t timecount_TIM7 = 0;
 uint32_t AccelDecelcount_TIM7 = 0;
+#ifdef DuoTongDao
+uint8_t  Motor6_State = 1 ;
+#endif
+#ifdef L298N_StepMotorCtrl
 int  Motor6_State = 0 ;
+#endif
 //直流电机控制
 uint32_t timecount_TIM12_DCM6 = 0 ;
 uint32_t timecount_TIM12_DCM7 = 0 ;
@@ -401,12 +406,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 			timecount_TIM13++;
 			AccelDecelcount_TIM13++;
+#ifdef JiaYangZhen
 			if (Motor[3].StepPosition > 7000){
 				printf("[WRONG]OverTrip!!!,Motor[3].StepPosition:%ld\r\n",Motor[3].StepPosition);
 				Motor[3].Status = 0;
 				HAL_TIM_Base_Stop_IT(&htim13);
 			}
-#ifdef JiaYangZhen
+
 			if (DetectionTask_STATE == Cap0_Sample_State){
 				switch (Follow_state){
 				case 1:
@@ -729,39 +735,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if ( get_ADC1_Current_Phase(0) < (abs(Motor6_MicroSteps[Motor6_State][1])*VM6_Full_Current) ){
 				if ( Motor6_MicroSteps[Motor6_State][1] > 0 ){
 					Motor6_A();
-					LED0_ON();
 				}else{
 					Motor6_a();
-					LED0_OFF();
 				}
 			}else{
 				Motor6_A_release();
-//				if ( Motor6_MicroSteps[Motor6_State][1] > 0 ){
-//					Motor6_a();
-//					LED0_OFF();
-//				}else{
-//					Motor6_A();
-//					LED0_ON();
-//				}
 			}
 
 			if ( get_ADC1_Current_Phase(1) < (abs(Motor6_MicroSteps[Motor6_State][2])*VM6_Full_Current) ){
 				if ( Motor6_MicroSteps[Motor6_State][2] > 0 ){
 					Motor6_B();
-					LED1_ON();
 				}else{
 					Motor6_b();
-					LED1_OFF();
 				}
 			}else{
 				Motor6_B_release();
-//				if ( Motor6_MicroSteps[Motor6_State][2] > 0 ){
-//					Motor6_b();
-//					LED1_OFF();
-//				}else{
-//					Motor6_B();
-//					LED1_ON();
-//				}
 			}
 
 			if(timecount_TIM7 >= Motor[6].StepperSpeedTMR)

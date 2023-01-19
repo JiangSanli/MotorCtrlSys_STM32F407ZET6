@@ -16,7 +16,8 @@
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
 //#define WeiLiuKong		// 微流控小5V步进电机
 //#define DushuModule		// PMT读数模块
-#define L298N_StepMotorCtrl
+//#define L298N_StepMotorCtrl
+#define DuoTongDao
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
@@ -82,6 +83,7 @@ extern uint8_t myTask03_Status;
 #define Motor3_reset_OPTstatus		OPT3_ON()
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
 #else
+#ifdef JiaYangZhen
 #define Motor2_reset_direction 		Motor2_Dir_Backward()	// 加样针模块42步进电机-X方向
 #define Motor2_Nreset_direction 	Motor2_Dir_Forward()
 #define Motor2_reset_OPTstatus		OPT2_ON()
@@ -90,6 +92,16 @@ extern uint8_t myTask03_Status;
 #define Motor3_Nreset_direction 	Motor3_Dir_Backward()
 #define Motor3_reset_OPTstatus		OPT3_ON()
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
+#else //多通道28电机配置
+#define Motor2_reset_direction 		Motor2_Dir_Backward()	// 多通道Z轴电机向下运动
+#define Motor2_Nreset_direction 	Motor2_Dir_Forward()
+#define Motor2_reset_OPTstatus		OPT2_OFF()
+#define Motor2_Nreset_OPTstatus		OPT2_ON()
+#define Motor3_reset_direction 		Motor3_Dir_Forward()	// 加样针模块42步进电机-Z方向
+#define Motor3_Nreset_direction 	Motor3_Dir_Backward()
+#define Motor3_reset_OPTstatus		OPT3_OFF()
+#define Motor3_Nreset_OPTstatus		OPT3_ON()
+#endif
 #endif
 
 #define Motor4_reset_direction 		Motor4_Dir_Forward()	// 磁分离&加样针柱塞泵

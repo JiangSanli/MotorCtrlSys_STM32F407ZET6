@@ -9,9 +9,8 @@
 #include "stdlib.h"
 #include "ScheduleTable.h"
 
-uint32_t TPMark[14] ={0};
-
 // Cifenli 转盘角度对应步数表
+uint32_t TPMark[14] ={0};
 void Turntable_Position_Init(void)
 {
 	// micro_steps=8
@@ -76,7 +75,23 @@ void Motor6_MicroSteps_Table_Init(void)
 	Motor6_MicroSteps_Increment = 8/Motor[6].mircro_steps ;
 }
 
-
+// DuoTongDao Z轴8格试剂条位置
+#define VP_gap  8192
+#define VP_first_place 3488
+uint32_t VPMark[8] ={0};
+void Vertical_Position_Init(void)
+{
+	// micro_steps=16
+	VPMark[0] = VP_first_place;	//位置1，最上方格口对齐
+	VPMark[1] = VPMark[0] + VP_gap;
+	//VPMark[2] = VPMark[1] + VP_gap;
+	VPMark[2] = 20224;
+	VPMark[3] = VPMark[2] + VP_gap;
+	VPMark[4] = VPMark[3] + VP_gap;
+	VPMark[5] = VPMark[4] + VP_gap;
+	VPMark[6] = VPMark[5] + VP_gap;
+	VPMark[7] = VPMark[6] + VP_gap;
+}
 
 
 
