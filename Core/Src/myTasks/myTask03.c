@@ -670,7 +670,7 @@ void StartTask03(void *argument)
 			}
 			break;
 
-		case 10:	//	KEY0： 灌注液体 吸液200uL-注液200uL，过程中不进行延时和读数
+		case 10:	//	KEY0- 灌注液体 吸液uL-注液uL，过程中不进行延时和读数
 			if (Motor[4].Status == 0){
 				Motor4_SuckInMode(100);
 				myTask03_Status = 11;
@@ -685,7 +685,7 @@ void StartTask03(void *argument)
 			osDelay(10);
 			break;
 
-		case 20:	//	KEY1： 直接读书10秒，不进行洗液和注液
+		case 20:	//	KEY1- 直接读书10秒，不进行洗液和注液
 			printf("-7\n");
 			osDelay(50);
 			CH297_Module_START();
@@ -701,7 +701,7 @@ void StartTask03(void *argument)
 			myTask03_Status = INITPASSSTATE;
 			break;
 
-		case 30:	//	KEY2： 正常流程- 吸液200uL-开始计数-注液200uL-持续7秒后输出结果
+		case 30:	//	KEY2- 吸液200uL-开始计数-注液200uL-持续7秒后输出结果
 			if (Motor[4].Status == 0){
 				Motor4_SuckInMode(200);
 				myTask03_Status = 31;
@@ -822,29 +822,124 @@ void StartTask03(void *argument)
 
 
 #ifdef DuoTongDao
+
+uint8_t DTD_Motors_Init(void)
+{
+	printf("DTD Reseting Motors:3-5-6-2 ...\r\n");
+
+	Motor3_Enable();	// reset motor3 and goto external side
+	if ( !(Motor_Reset(&Motor[3])) ){
+		Motor3_Disable();
+		printf("[WRONG!]Motor3 reset failed! ...\r\n");\
+		return FAIL ;
+	}
+	HAL_Delay(200);
+	MotorMove_position(&Motor[3],data_V0.Position_motor3_external);
+	HAL_Delay(200);
+	while(Motor[3].Status){
+		HAL_Delay(100);
+	}
+
+	VM5_Enable_A();	VM5_Enable_B();	// reset motor5 and goto external side
+	if ( !(Motor_Reset(&Motor[5])) ){
+		VM5_Disable_A(); VM5_Disable_B();
+		printf("[WRONG!]Motor5 reset failed! ...\r\n");\
+		return FAIL ;
+	}
+
+	VM6_Enable_A();	VM6_Enable_B();	// reset motor6
+	if ( !(Motor_Reset(&Motor[6])) ){
+		VM6_Disable_A(); VM6_Disable_B();
+		printf("[WRONG!]Motor6 reset failed! ...\r\n");\
+		return FAIL ;
+	}
+
+	HAL_Delay(200);
+	MotorMove_position(&Motor[5],data_V0.Position_motor5_external);
+	HAL_Delay(200);
+	while(Motor[5].Status){
+		HAL_Delay(100);
+	}
+
+
+	Motor2_Enable();	// reset motor2 and goto top one
+	if ( !(Motor_Reset(&Motor[2])) ){
+		Motor2_Disable();
+		printf("[WRONG!]Motor2 reset failed! ...\r\n");\
+		return FAIL ;
+	}
+	HAL_Delay(200);
+	MotorMove_position(&Motor[2],VPMark[6]);
+	HAL_Delay(200);
+	while(Motor[2].Status){
+		HAL_Delay(100);
+	}
+
+	return SUCCESS ;
+}
+
+uint8_t DTD_All_Motors_Idle(void)
+{
+	osDelay(100);
+	if ( (!Motor[5].Status) & (!Motor[6].Status) & (!Motor[3].Status) & (!Motor[2].Status) ){
+		return 1 ;
+	}
+	else{
+		return 0 ;
+	}
+}
+
+uint8_t DTD_Motors_Standby_State(void)
+{
+	HAL_Delay(100);
+	MotorMove_position(&Motor[3],data_V0.Position_motor3_external);
+	HAL_Delay(100);
+	while(Motor[3].Status){
+		HAL_Delay(100);
+	}
+
+	HAL_Delay(100);
+	MotorMove_position(&Motor[6],data_V0.Position_motor6_PushRod_reset);
+	HAL_Delay(100);
+	while(Motor[6].Status){
+		HAL_Delay(100);
+	}
+
+	HAL_Delay(100);
+	MotorMove_position(&Motor[5],data_V0.Position_motor5_external);
+	HAL_Delay(100);
+	while(Motor[5].Status){
+		HAL_Delay(100);
+	}
+	return SUCCESS;
+}
+
+uint8_t 	DTD_StripIn_State = 0 ;
+uint32_t 	DTD_CNT_i;
+
 void StartTask03(void *argument)
 {
 	osDelay(10);
 	printf("myTask03 starts! \r\n");
 
 	Motor_Data_Init();
-	Vertical_Position_Init();
-	osDelay(100);
-	if ( 0b00000110 == ALL_Motors_Init(0b00000110) ){
+	DuoTongDao_Position_Init();
+	osDelay(300);
+	if ( DTD_Motors_Init() ){
 		printf("Motors Initialization Completed! \r\n");
 		myTask03_Status = INITPASSSTATE;
 	}
 	else{
 		myTask03_Status = INITFAILSTATE;
 	}
-	VM5_Enable_A();	VM5_Enable_B();
-	VM6_Enable_A();	VM6_Enable_B();
-	uint8_t motor2_next_state = 10;
-	uint8_t motor3_next_state = 20;
 
 //	Motor2_Enable();
 //	Motor3_Enable();
+//	VM5_Enable_A();	VM5_Enable_B();
+//	VM6_Enable_A();	VM6_Enable_B();
 //	myTask03_Status = INITPASSSTATE;
+
+	uint8_t temp_n = 0 ;
 
 	for(;;)
 	{
@@ -860,7 +955,7 @@ void StartTask03(void *argument)
 				{
 					osDelay(20);
 					while (KEY0_Pressed()){osDelay(1);}
-					myTask03_Status = motor2_next_state;
+					myTask03_Status = 10;
 					printf("Key0 pressed!\r\n");
 				}
 			}
@@ -871,7 +966,7 @@ void StartTask03(void *argument)
 				{
 					osDelay(20);
 					while (KEY1_Pressed()){osDelay(1);}
-					myTask03_Status = motor3_next_state;
+					myTask03_Status = 20;
 					printf("Key1 pressed!\r\n");
 				}
 			}
@@ -882,62 +977,156 @@ void StartTask03(void *argument)
 				{
 					osDelay(20);
 					while (KEY2_Pressed()){osDelay(1);}
-					myTask03_Status = 30;
+					myTask03_Status = 130;
 					printf("Key2 pressed!\r\n");
 				}
 			}
 			break;
 
 		case 10:
+			osDelay(300);
 			if (Motor[2].Status == 0){
-				MotorMove_position(&Motor[2],VPMark[0]);
-				motor2_next_state = 11;
+				MotorMove_position(&Motor[2],VPMark[temp_n]);
+				if(temp_n >= 7)
+					temp_n =  0 ;
+				else
+					temp_n = temp_n +1 ;
 				myTask03_Status=INITPASSSTATE;
 			}
-			break;
+		break;
 
-		case 11:
-			if (Motor[2].Status == 0){
-				MotorMove_position(&Motor[2],VPMark[2]);
-				motor2_next_state = 12;
-				myTask03_Status=INITPASSSTATE;
+		case 20:	//行进到准备姿态，持续检测试剂条插入
+			osDelay(1);
+			if(DTD_All_Motors_Idle()){
+				if (DTD_Motors_Standby_State()) {
+					printf("DTD in Standby state,waiting strip in. \r\n");
+					myTask03_Status = 21;
+				}
 			}
-			break;
-
-		case 12:
-			if (Motor[2].Status == 0){
-				MotorMove_position(&Motor[2],-16);
-				motor2_next_state = 10 ;
-				myTask03_Status=INITPASSSTATE;
-			}
-			break;
-
-		case 20:
-			if (Motor[3].Status == 0){
-				MotorMove_position(&Motor[3],19200); //刚好推进试剂储藏处
-				motor3_next_state = 21 ;
-				myTask03_Status=INITPASSSTATE;
-			}
-			break;
+		break;
 
 		case 21:
-			if (Motor[3].Status == 0){
-				MotorMove_position(&Motor[3],-16);
-				motor3_next_state = 20 ;
-				myTask03_Status=INITPASSSTATE;
+			osDelay(1);
+			switch(DTD_StripIn_State)
+			{
+				case 0:
+					if ( (Strip_Triggerd)&&(Strip_UnBlocked) ){
+						for( DTD_CNT_i=0 ; (Strip_Triggerd)&(Strip_UnBlocked) ; DTD_CNT_i++){
+							HAL_Delay(1);
+						}
+						if(DTD_CNT_i > 200){
+							DTD_StripIn_State = 1 ;
+						}
+						else{
+							DTD_StripIn_State = 0 ;
+						}
+						printf("DTD_CNT_i=%ld  ; DTD_StripIn_State=%d   \r\n ", DTD_CNT_i,DTD_StripIn_State);
+					}
+				break;
+
+				case 1:
+					if ( (Strip_Triggerd)&&(Strip_Blocked) ){
+						for( DTD_CNT_i=0 ; (Strip_Triggerd)&(Strip_Blocked) ; DTD_CNT_i++){
+							HAL_Delay(1);
+						}
+						if(DTD_CNT_i > 100){
+							DTD_StripIn_State = 2 ;
+						}
+						else{
+							DTD_StripIn_State = 0 ;
+						}
+						printf("DTD_CNT_i=%ld  ; DTD_StripIn_State=%d   \r\n ", DTD_CNT_i,DTD_StripIn_State);
+					}
+				break;
+
+				case 2:
+					if ( (Strip_UnTriggerd)&&(Strip_Blocked) ){
+						for( DTD_CNT_i=0 ; (Strip_UnTriggerd)&(Strip_Blocked) ; DTD_CNT_i++){
+							HAL_Delay(1);
+							if(DTD_CNT_i > 1000){
+								DTD_StripIn_State = 3 ;
+								break;
+							}
+						}
+					}
+				break;
+
+				case 3:
+					printf("Strip inserted! Begin to detect... \r\n");
+					DTD_StripIn_State = 0 ;
+					myTask03_Status = 22;
+					osDelay(500);
+				break;
+
 			}
-			break;
+		break;
 
-		case 30:
-			if (Motor[3].Status == 0){
-				MotorMove_position(&Motor[3],61680);
-				motor3_next_state = 22 ;
-				myTask03_Status=INITPASSSTATE;
+		case 22:
+			osDelay(1);
+			if( DTD_All_Motors_Idle() ){
+				MotorMove_position(&Motor[5],data_V0.Position_motor5_internal);
+				myTask03_Status = 23;
 			}
-			break;
+		break;
+
+		case 23:
+			osDelay(1);
+			if( DTD_All_Motors_Idle() ){
+				MotorMove_position(&Motor[6],data_V0.Position_motor6_PushRod_push);
+				myTask03_Status = 24;
+			}
+		break;
+
+		case 24:
+			osDelay(1);
+			if( DTD_All_Motors_Idle() ){
+				osDelay(800);
+				MotorMove_position(&Motor[3],data_V0.Position_motor3_storage);
+				myTask03_Status = 25;
+			}
+		break;
+
+		case 25:
+			osDelay(1);
+			if( DTD_All_Motors_Idle() ){
+				osDelay(800);
+				MotorMove_position(&Motor[3],data_V0.Position_motor3_detect);
+				myTask03_Status = 26;
+			}
+		break;
+
+		case 26:
+			osDelay(1);
+			if( DTD_All_Motors_Idle() ){
+				osDelay(1000);
+				MotorMove_position_lowspeed(&Motor[3],data_V0.Position_motor3_reset);
+				myTask03_Status = 27;
+			}
+		break;
+
+		case 27:
+			osDelay(1);
+			if(DTD_All_Motors_Idle()){
+				if (DTD_Motors_Standby_State()) {
+					myTask03_Status = 21;
+				}
+			}
+		break;
 
 
 
+
+
+
+
+
+
+
+
+
+		case 130:	//老化测试
+			myTask03_Status = INITPASSSTATE;
+		break;
 
 
 		case INITFAILSTATE:

@@ -5,6 +5,7 @@
 #include "main.h"
 #include "myADC.h"
 #include "MotorCtrl.h"
+#include "ScheduleTable.h"
 
 #define MOTORTIM_TMR 100000			 		// 设定STM32F4单片机计时器中断频率为100kHz
 #define Encoder2_0position_number 1000		//编码器2:设定0位编码器的计数值，便于对负数进行计算
@@ -88,19 +89,19 @@ extern uint8_t myTask03_Status;
 #define Motor2_Nreset_direction 	Motor2_Dir_Forward()
 #define Motor2_reset_OPTstatus		OPT2_ON()
 #define Motor2_Nreset_OPTstatus		OPT2_OFF()
+#define Motor3_reset_direction 		Motor3_Dir_Backward()	// 加样针模块42步进电机-Z方向
+#define Motor3_Nreset_direction 	Motor3_Dir_Forward()
+#define Motor3_reset_OPTstatus		OPT3_OFF()
+#define Motor3_Nreset_OPTstatus		OPT3_ON()
+#else //多通道28电机配置
+#define Motor2_reset_direction 		Motor2_Dir_Backward()	// 多通道Z轴电机向下运动
+#define Motor2_Nreset_direction 	Motor2_Dir_Forward()
+#define Motor2_reset_OPTstatus		OPT2_ON()
+#define Motor2_Nreset_OPTstatus		OPT2_OFF()
 #define Motor3_reset_direction 		Motor3_Dir_Forward()	// 加样针模块42步进电机-Z方向
 #define Motor3_Nreset_direction 	Motor3_Dir_Backward()
 #define Motor3_reset_OPTstatus		OPT3_ON()
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
-#else //多通道28电机配置
-#define Motor2_reset_direction 		Motor2_Dir_Backward()	// 多通道Z轴电机向下运动
-#define Motor2_Nreset_direction 	Motor2_Dir_Forward()
-#define Motor2_reset_OPTstatus		OPT2_OFF()
-#define Motor2_Nreset_OPTstatus		OPT2_ON()
-#define Motor3_reset_direction 		Motor3_Dir_Forward()	// 加样针模块42步进电机-Z方向
-#define Motor3_Nreset_direction 	Motor3_Dir_Backward()
-#define Motor3_reset_OPTstatus		OPT3_OFF()
-#define Motor3_Nreset_OPTstatus		OPT3_ON()
 #endif
 #endif
 
@@ -110,11 +111,18 @@ extern uint8_t myTask03_Status;
 #define Motor4_Nreset_OPTstatus		OPT4_ON()
 
 
-#define Motor5_reset_OPTstatus		OPT9_OFF()
-#define Motor5_Nreset_OPTstatus		OPT9_ON()
+#define Motor5_reset_OPTstatus		OPT5_ON()
+#define Motor5_Nreset_OPTstatus		OPT5_OFF()
 
-#define Motor6_reset_OPTstatus		OPT10_ON()
-#define Motor6_Nreset_OPTstatus		OPT10_OFF()
+#define Motor6_reset_OPTstatus		OPT6_ON()
+#define Motor6_Nreset_OPTstatus		OPT6_OFF()
+
+#ifdef DuoTongDao
+#define Strip_Triggerd				OPT12_ON()
+#define Strip_UnTriggerd			OPT12_OFF()
+#define Strip_Blocked				OPT11_ON()
+#define Strip_UnBlocked				OPT11_OFF()
+#endif
 
 
 void Motor_Data_Init(void);
@@ -124,6 +132,7 @@ void AccelDecel(uint32_t AccelDecelState,struct MotorDefine *a);
 void print_MotorInformation(struct MotorDefine *a);
 void MotorMove_steps(struct MotorDefine *temp);
 void MotorMove_position(struct MotorDefine *temp  , int32_t targer_position);
+void MotorMove_position_lowspeed(struct MotorDefine *temp  , int32_t targer_position);
 void MotorMove_position_Enocder(struct MotorDefine *temp  , int32_t targer_position_encoder);
 uint8_t Motor_Reset(struct MotorDefine *temp);
 uint8_t Motor4_SuckInMode(uint32_t x_uL);

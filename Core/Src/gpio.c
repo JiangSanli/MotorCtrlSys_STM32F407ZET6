@@ -339,19 +339,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 #ifdef DuoTongDao
         case OPT_IN2_Pin:
         	if (OPT_IN2_GPIO_Port->IDR & OPT_IN2_Pin){ 	// if Rising edge trigger
-        		Motor[2].StepPosition =0 ;
+        		;
         	}
         	else {
-        		;
+        		Motor[2].StepPosition =0 ;
         	}
         	break;
 
         case OPT_IN3_Pin:
         	if (OPT_IN3_GPIO_Port->IDR & OPT_IN3_Pin) { 	// if Rising edge trigger
-        		Motor[3].StepPosition =0 ;
+        		;
         	}
         	else {
-        		;
+        		Motor[3].StepPosition =0 ;
         	}
         	break;
 #endif
@@ -366,6 +366,27 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         		 ;
         	}
             break;
+
+#ifdef DuoTongDao		// 多通道 5V stepmotor
+        case OPT_IN5_Pin:
+        	if (OPT_IN5_GPIO_Port->IDR & OPT_IN5_Pin) { 	// if Rising edge trigger
+        		;
+        	}
+        	else {
+        		Motor[5].StepPosition =0 ;
+        	}
+            break;
+
+        case OPT_IN6_Pin:
+        	if (OPT_IN6_GPIO_Port->IDR & OPT_IN6_Pin) { 	// if Rising edge trigger
+        		 ;
+        	}
+        	else {
+        		Motor[6].StepPosition =0 ;
+        	}
+            break;
+#endif
+
 
 #ifdef WeiLiuKong
         // 微流�?5 V电机

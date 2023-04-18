@@ -75,23 +75,41 @@ void Motor6_MicroSteps_Table_Init(void)
 	Motor6_MicroSteps_Increment = 8/Motor[6].mircro_steps ;
 }
 
-// DuoTongDao Z轴8格试剂条位置
-#define VP_gap  8192
-#define VP_first_place 3488
+/***********  DuoTongDao **************/
+
+#define VP_first_place 126071 ;
+#define VP_gap  18082
 uint32_t VPMark[8] ={0};
-void Vertical_Position_Init(void)
+struct DuoTongDao_SetPositionData data_V0 ;
+void DuoTongDao_Position_Init(void)
 {
-	// micro_steps=16
-	VPMark[0] = VP_first_place;	//位置1，最上方格口对齐
-	VPMark[1] = VPMark[0] + VP_gap;
-	//VPMark[2] = VPMark[1] + VP_gap;
-	VPMark[2] = 20224;
-	VPMark[3] = VPMark[2] + VP_gap;
-	VPMark[4] = VPMark[3] + VP_gap;
-	VPMark[5] = VPMark[4] + VP_gap;
-	VPMark[6] = VPMark[5] + VP_gap;
-	VPMark[7] = VPMark[6] + VP_gap;
+	VPMark[0] = VP_first_place;		//bot
+	VPMark[1] = VPMark[0] - VP_gap;
+	VPMark[2] = VPMark[1] - VP_gap;
+	VPMark[3] = VPMark[2] - VP_gap;
+	VPMark[4] = VPMark[3] - VP_gap;
+	VPMark[5] = VPMark[4] - VP_gap;
+	VPMark[6] = VPMark[5] - VP_gap;
+	VPMark[7] = VPMark[6] - VP_gap;
+
+	data_V0.Position_motor6_PushRod_reset = -16 ;
+	data_V0.Position_motor6_PushRod_push = 496 ;
+
+	data_V0.Position_motor5_internal = -160 ;
+	data_V0.Position_motor5_external = 960 ;
+
+	data_V0.Position_motor3_reset = -512 ;
+	data_V0.Position_motor3_detect =  52224;
+	data_V0.Position_motor3_storage =  87808;
+	data_V0.Position_motor3_external = 125840 ;
 }
+
+
+
+
+
+
+
 
 
 

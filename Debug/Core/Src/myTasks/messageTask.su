@@ -1,0 +1,5 @@
+../Core/Src/myTasks/messageTask.c:25:6:deal_buffer_motorCtrl_data	72	static
+../Core/Src/myTasks/messageTask.c:52:6:deal_buffer_motorCtrl_position	16	static
+../Core/Src/myTasks/messageTask.c:64:6:deal_buffer_motorCtrl_reset	16	static
+../Core/Src/myTasks/messageTask.c:71:6:deal_buffer_DCmotorCtrl	16	static
+../Core/Src/myTasks/messageTask.c:83:6:StartmessageTask	24	static

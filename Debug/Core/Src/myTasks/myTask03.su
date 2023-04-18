@@ -1,0 +1,4 @@
+../Core/Src/myTasks/myTask03.c:826:9:DTD_Motors_Init	8	static
+../Core/Src/myTasks/myTask03.c:881:9:DTD_All_Motors_Idle	8	static
+../Core/Src/myTasks/myTask03.c:892:9:DTD_Motors_Standby_State	8	static
+../Core/Src/myTasks/myTask03.c:920:6:StartTask03	32	static
