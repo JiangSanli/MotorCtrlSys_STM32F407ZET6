@@ -8,11 +8,7 @@
 #include "MotorCtrl.h"
 #include "stdlib.h"
 
-
-
 struct MotorDefine Motor[10];
-
-
 
 void Motor_Data_Init(void)
 {
