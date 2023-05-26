@@ -12,13 +12,13 @@
 #define Encoder3_0position_number 64535		//编码器2:设定0位编码器的计数值，便于对负数进行计算
 
 //#define CiFenLi  		// 磁分离电机控制
-//#define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
+#define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
 //#define RZ_stepmotor	// RZ步进电机
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
 //#define WeiLiuKong		// 微流控小5V步进电机
 //#define DushuModule		// PMT读数模块
 //#define L298N_StepMotorCtrl
-#define DuoTongDao
+//#define DuoTongDao
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
@@ -132,7 +132,7 @@ void AccelDecel(uint32_t AccelDecelState,struct MotorDefine *a);
 void print_MotorInformation(struct MotorDefine *a);
 void MotorMove_steps(struct MotorDefine *temp);
 void MotorMove_position(struct MotorDefine *temp  , int32_t targer_position);
-void MotorMove_position_lowspeed(struct MotorDefine *temp  , int32_t targer_position);
+void MotorMove_position_lowspeed(struct MotorDefine *temp  , int32_t targer_position , float low_speed );
 void MotorMove_position_Enocder(struct MotorDefine *temp  , int32_t targer_position_encoder);
 uint8_t Motor_Reset(struct MotorDefine *temp);
 uint8_t Motor4_SuckInMode(uint32_t x_uL);

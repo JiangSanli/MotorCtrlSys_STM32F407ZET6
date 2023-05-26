@@ -262,7 +262,7 @@ void Motor_Data_Init(void)
 #endif
 
 #ifdef L298N_StepMotorCtrl
-/*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动   */
+/*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动  理想速度：20rads/s 导程0.5mm/rad 行进速度:10mm/s */
 	Motor[6].MotorNumber = 6;
 	Motor[6].Status = 0;
 	Motor[6].htim_x = &htim7;
@@ -685,7 +685,7 @@ void MotorMove_position(struct MotorDefine *temp  , int32_t targer_position)
 	HAL_TIM_Base_Start_IT(Motor[temp->MotorNumber].htim_x);
 }
 
-void MotorMove_position_lowspeed(struct MotorDefine *temp  , int32_t targer_position)
+void MotorMove_position_lowspeed(struct MotorDefine *temp  , int32_t targer_position , float low_speed )
 {
 	if (Motor[temp->MotorNumber].Status == 1){
 		printf("[WRONG] Position Set Failed,Motor%d is busy!\r\n",Motor[temp->MotorNumber].MotorNumber);
@@ -696,8 +696,9 @@ void MotorMove_position_lowspeed(struct MotorDefine *temp  , int32_t targer_posi
 	}
 
 	Motor[temp->MotorNumber].StepsInOneCircle = (360 / Motor[temp->MotorNumber].step_angle) * Motor[temp->MotorNumber].deceleration_ratio * Motor[temp->MotorNumber].mircro_steps;
-	Motor[temp->MotorNumber].StartupSpeedInHz = Motor[temp->MotorNumber].StepsInOneCircle * Motor[temp->MotorNumber].StartupSpeedInRads ;
-	Motor[temp->MotorNumber].ActualSpeedInHz = Motor[temp->MotorNumber].StartupSpeedInHz;
+	//Motor[temp->MotorNumber].StartupSpeedInHz = Motor[temp->MotorNumber].StepsInOneCircle * Motor[temp->MotorNumber].StartupSpeedInRads ;
+	//Motor[temp->MotorNumber].ActualSpeedInHz = Motor[temp->MotorNumber].StartupSpeedInHz;
+	Motor[temp->MotorNumber].ActualSpeedInHz = Motor[temp->MotorNumber].StepsInOneCircle * low_speed;
 	//Motor[temp->MotorNumber].DesiredSpeedInHz = Motor[temp->MotorNumber].StepsInOneCircle * Motor[temp->MotorNumber].DesiredSpeedInRads ;
 	Motor[temp->MotorNumber].StepperSpeedTMR = MOTORTIM_TMR / Motor[temp->MotorNumber].ActualSpeedInHz;
 

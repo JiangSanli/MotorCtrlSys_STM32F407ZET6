@@ -29,10 +29,10 @@
 ../Core/Src/myFunc/MotorCtrl.c:529:6:MotorDirection_SetUp	16	static
 ../Core/Src/myFunc/MotorCtrl.c:569:6:MotorMove_steps	16	static
 ../Core/Src/myFunc/MotorCtrl.c:622:6:MotorMove_position	16	static
-../Core/Src/myFunc/MotorCtrl.c:688:6:MotorMove_position_lowspeed	16	static
-../Core/Src/myFunc/MotorCtrl.c:796:6:MotorRun_LowSpeed	16	static
-../Core/Src/myFunc/MotorCtrl.c:840:9:Motor_Reset	64	static
-../Core/Src/myFunc/MotorCtrl.c:1050:9:Motor4_SuckInMode	24	static
-../Core/Src/myFunc/MotorCtrl.c:1095:9:Motor4_PushOutMode	24	static
-../Core/Src/myFunc/MotorCtrl.c:1136:6:DC_Motor_ON	24	static
-../Core/Src/myFunc/MotorCtrl.c:1168:6:DC_Motor_OFF	16	static
+../Core/Src/myFunc/MotorCtrl.c:688:6:MotorMove_position_lowspeed	24	static
+../Core/Src/myFunc/MotorCtrl.c:797:6:MotorRun_LowSpeed	16	static
+../Core/Src/myFunc/MotorCtrl.c:841:9:Motor_Reset	64	static
+../Core/Src/myFunc/MotorCtrl.c:1051:9:Motor4_SuckInMode	24	static
+../Core/Src/myFunc/MotorCtrl.c:1096:9:Motor4_PushOutMode	24	static
+../Core/Src/myFunc/MotorCtrl.c:1137:6:DC_Motor_ON	24	static
+../Core/Src/myFunc/MotorCtrl.c:1169:6:DC_Motor_OFF	16	static

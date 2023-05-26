@@ -1,0 +1,5 @@
+messageTask.c:25:6:deal_buffer_motorCtrl_data	3
+messageTask.c:52:6:deal_buffer_motorCtrl_position	3
+messageTask.c:64:6:deal_buffer_motorCtrl_reset	1
+messageTask.c:71:6:deal_buffer_DCmotorCtrl	2
+messageTask.c:83:6:StartmessageTask	17

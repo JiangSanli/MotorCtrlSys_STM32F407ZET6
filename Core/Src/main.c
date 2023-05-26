@@ -237,12 +237,13 @@ uint32_t AccelDecelcount_TIM6 = 0;
 uint8_t  Motor5_State = 1 ;
 uint32_t timecount_TIM7 = 0;
 uint32_t AccelDecelcount_TIM7 = 0;
-#ifdef DuoTongDao
-uint8_t  Motor6_State = 1 ;
-#endif
+
 #ifdef L298N_StepMotorCtrl
 int  Motor6_State = 0 ;
+#else
+uint8_t  Motor6_State = 1 ;
 #endif
+
 //直流电机控制
 uint32_t timecount_TIM12_DCM6 = 0 ;
 uint32_t timecount_TIM12_DCM7 = 0 ;

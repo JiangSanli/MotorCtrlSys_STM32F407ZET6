@@ -275,13 +275,16 @@ void StartTask03(void *argument)
 
 	Motor_Data_Init();
 	osDelay(100);
-	if ( 0b00001110 == ALL_Motors_Init(0b00001110) ){
-		printf("Motors Initialization Completed! \r\n");
-		myTask03_Status = INITPASSSTATE;
-	}
-	else{
-		myTask03_Status = INITFAILSTATE;
-	}
+//	if ( 0b00001110 == ALL_Motors_Init(0b00001110) ){
+//		printf("Motors Initialization Completed! \r\n");
+//		myTask03_Status = INITPASSSTATE;
+//	}
+//	else{
+//		myTask03_Status = INITFAILSTATE;
+//	}
+	Motor1_Enable();
+	Motor2_Enable();
+	myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -1099,7 +1102,7 @@ void StartTask03(void *argument)
 			osDelay(1);
 			if( DTD_All_Motors_Idle() ){
 				osDelay(1000);
-				MotorMove_position_lowspeed(&Motor[3],data_V0.Position_motor3_reset);
+				MotorMove_position_lowspeed(&Motor[3],data_V0.Position_motor3_reset, 1);
 				myTask03_Status = 27;
 			}
 		break;
