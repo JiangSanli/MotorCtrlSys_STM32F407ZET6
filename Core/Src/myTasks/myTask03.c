@@ -284,6 +284,7 @@ void StartTask03(void *argument)
 //	}
 	Motor1_Enable();
 	Motor2_Enable();
+	Motor3_Enable();
 	myTask03_Status = INITPASSSTATE;
 
 	for(;;)

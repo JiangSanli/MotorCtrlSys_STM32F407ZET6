@@ -307,14 +307,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 #ifdef JiaYangZhen
         case OPT_IN2_Pin:
         	if (OPT_IN2_GPIO_Port->IDR & OPT_IN2_Pin) { 	// if Rising edge trigger
-        		;
+        		Motor[2].StepPosition =0 ;
         	}
         	else {
         		if(Motor[2].MotorDirection == 0){
 #ifdef JiaYangZhen_EncoderMode
         			__HAL_TIM_SET_COUNTER(&htim4,Encoder2_0position_number);
 #else
-        			Motor[2].StepPosition =0 ;
+        			//Motor[2].StepPosition =0 ;
 #endif
         		}
         	}
@@ -322,14 +322,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
         case OPT_IN3_Pin:
         	if (OPT_IN3_GPIO_Port->IDR & OPT_IN3_Pin) { 	// if Rising edge trigger
-        		;
+        		Motor[3].StepPosition =0 ;
         	}
         	else {
         		if(Motor[3].MotorDirection == 0){
 #ifdef JiaYangZhen_EncoderMode
         			__HAL_TIM_SET_COUNTER(&htim3,Encoder3_0position_number);
 #else
-        			Motor[3].StepPosition =0 ;
+        			//Motor[3].StepPosition =0 ;
 #endif
         		}
         	}

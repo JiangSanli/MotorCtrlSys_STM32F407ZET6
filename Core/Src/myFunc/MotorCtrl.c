@@ -64,7 +64,7 @@ void Motor_Data_Init(void)
 	Motor[2].Status = 0,
 	Motor[2].htim_x = &htim11,
 	//机械参数
-	Motor[2].deceleration_ratio = 2;
+	Motor[2].deceleration_ratio = 1;
 	Motor[2].step_angle = 1.8;
 	Motor[2].mircro_steps = 16;
 	Motor[2].MaxSpeedInRads= 25;
@@ -72,8 +72,8 @@ void Motor_Data_Init(void)
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[2].StartupSpeedInRads = 1;
 	Motor[2].DesiredSpeedInRads = 12;
-	Motor[2].accelerationRate = 8000;
-	Motor[2].decelerationRate = 5000;
+	Motor[2].accelerationRate = 10000;
+	Motor[2].decelerationRate = 10000;
 
 /*  Motor3: 加样针垂直方向步进电机,4细分800步每圈，编码器为1000P/R  */
 	Motor[3].MotorNumber = 3;
@@ -267,14 +267,14 @@ void Motor_Data_Init(void)
 	Motor[6].Status = 0;
 	Motor[6].htim_x = &htim7;
 	//机械参数
-	Motor[6].deceleration_ratio = 1;
+	Motor[6].deceleration_ratio = 25;
 	Motor[6].step_angle = 18;
 	Motor[6].mircro_steps = 8;
-	Motor[6].MaxSpeedInRads= 60;
+	Motor[6].MaxSpeedInRads= 100;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
-	Motor[6].StartupSpeedInRads = 20;
-	Motor[6].DesiredSpeedInRads = 30;
-	Motor[6].accelerationRate = 30000;
+	Motor[6].StartupSpeedInRads = 5;
+	Motor[6].DesiredSpeedInRads = 20;
+	Motor[6].accelerationRate = 20000;
 	Motor[6].decelerationRate = 20000;
 #endif
 }

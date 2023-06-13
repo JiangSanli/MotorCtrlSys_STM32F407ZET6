@@ -11,7 +11,7 @@
 #include "myADC.h"
 
 
-#define VM6_Full_Current 5	//x100mA,乘以细分表100%后，200mA系数为2
+#define VM6_Full_Current 20	//x100mA,乘以细分表100%后，200mA系数为2
 
 extern uint16_t ADC_Values[2];
 

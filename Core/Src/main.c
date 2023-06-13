@@ -408,11 +408,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			timecount_TIM13++;
 			AccelDecelcount_TIM13++;
 #ifdef JiaYangZhen
-			if (Motor[3].StepPosition > 7000){
-				printf("[WRONG]OverTrip!!!,Motor[3].StepPosition:%ld\r\n",Motor[3].StepPosition);
-				Motor[3].Status = 0;
-				HAL_TIM_Base_Stop_IT(&htim13);
-			}
+//			if (Motor[3].StepPosition > 7000){
+//				printf("[WRONG]OverTrip!!!,Motor[3].StepPosition:%ld\r\n",Motor[3].StepPosition);
+//				Motor[3].Status = 0;
+//				HAL_TIM_Base_Stop_IT(&htim13);
+//			}
 
 			if (DetectionTask_STATE == Cap0_Sample_State){
 				switch (Follow_state){
