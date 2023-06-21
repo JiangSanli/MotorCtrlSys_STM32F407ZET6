@@ -234,6 +234,7 @@ void Error_Handler(void);
 #define VM3_En_GPIO_Port GPIOE
 #define VM3_Dir_Pin GPIO_PIN_1
 #define VM3_Dir_GPIO_Port GPIOE
+
 /* USER CODE BEGIN Private defines */
 
 #define LED0_ON()		HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET)

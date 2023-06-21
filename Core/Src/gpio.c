@@ -278,7 +278,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         		;
         	}
         	else {
-        		//Follow_state = 2;		// 使用入液�?测模块时，IO下降沿中断检�?
+        		//Follow_state = 2;		// 使用入液�??测模块时，IO下降沿中断检�??
         	}
             break;
 
@@ -367,7 +367,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	}
             break;
 
-#ifdef DuoTongDao		// 多通道 5V stepmotor
+#ifdef DuoTongDao		// 多�?�道 5V stepmotor
         case OPT_IN5_Pin:
         	if (OPT_IN5_GPIO_Port->IDR & OPT_IN5_Pin) { 	// if Rising edge trigger
         		;
@@ -389,7 +389,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 
 #ifdef WeiLiuKong
-        // 微流�?5 V电机
+        // 微流�??5 V电机
         case OPT_IN9_Pin:
         	if (OPT_IN9_GPIO_Port->IDR & OPT_IN9_Pin) { 	// if Rising edge trigger
         		Motor[5].StepPosition =0 ;

@@ -20,7 +20,7 @@
 #include "MotorCtrl.h"
 
 #ifndef DushuModule
-struct MotorDefine Motor_Temp ;
+struct  MotorDefine Motor_Temp ;
 
 void deal_buffer_motorCtrl_data(struct MotorDefine *a)
 {
