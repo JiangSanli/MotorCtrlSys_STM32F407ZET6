@@ -365,6 +365,37 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 /* USER CODE BEGIN 1 */
 
 #ifndef DushuModule
+#ifdef QuanxiePVctrl
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance==UART5)
+	{
+		if ( USART_RX_STA&0x8000 ){		// 判断是否已经完成接收(bit15-1则已接收完成)
+			;							// 如果完成接收数据接收且尚未处理，则不接受后续data
+		}
+		else{
+			if( USART_RX_STA&0x4000 ){		// start byte received
+				if( (aRxBuffer[0]==0x0A) || (aRxBuffer[0]==0x0D) ){	// end byte received
+					USART_RX_STA|=0x8000;
+					USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
+					USART_RX_STA++;
+				}
+				else{
+					USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
+					USART_RX_STA++;
+				}
+			}
+			else{							// no start byte
+				USART_RX_STA|=0x4000;
+				USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
+				USART_RX_STA++;
+				HAL_TIM_Base_Start_IT(&htim9);
+			}
+		}
+	}
+}
+
+#else
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance==UART5)
@@ -384,7 +415,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					USART_RX_STA++;
 				}
 			}
-			else{							// 如果没有收到起始�?
+			else{							// no start byte
 				if(aRxBuffer[0]==0xAA){
 					USART_RX_STA|=0x4000;
 					USART5_RX_BUF[USART_RX_STA&0X3FFF]=aRxBuffer[0] ;
@@ -398,6 +429,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		}
 	}
 }
+
+#endif
 
 #else
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)

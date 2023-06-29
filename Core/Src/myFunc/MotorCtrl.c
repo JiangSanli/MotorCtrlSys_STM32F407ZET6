@@ -64,16 +64,16 @@ void Motor_Data_Init(void)
 	Motor[2].Status = 0,
 	Motor[2].htim_x = &htim11,
 	//机械参数
-	Motor[2].deceleration_ratio = 1;
+	Motor[2].deceleration_ratio = 2;
 	Motor[2].step_angle = 1.8;
 	Motor[2].mircro_steps = 16;
 	Motor[2].MaxSpeedInRads= 25;
 	//Motor[2].Encoder_PulsePerRad = 1000;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
-	Motor[2].StartupSpeedInRads = 1;
-	Motor[2].DesiredSpeedInRads = 12;
-	Motor[2].accelerationRate = 10000;
-	Motor[2].decelerationRate = 10000;
+	Motor[2].StartupSpeedInRads = 0.4;
+	Motor[2].DesiredSpeedInRads = 1.5;
+	Motor[2].accelerationRate = 12000;
+	Motor[2].decelerationRate = 12000;
 
 /*  Motor3: 加样针垂直方向步进电机,4细分800步每圈，编码器为1000P/R  */
 	Motor[3].MotorNumber = 3;
@@ -87,9 +87,9 @@ void Motor_Data_Init(void)
 	//Motor[2].Encoder_PulsePerRad = 1000;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[3].StartupSpeedInRads = 1;
-	Motor[3].DesiredSpeedInRads = 10;
-	Motor[3].accelerationRate = 9000;
-	Motor[3].decelerationRate = 6000;
+	Motor[3].DesiredSpeedInRads = 5;
+	Motor[3].accelerationRate = 10000;
+	Motor[3].decelerationRate = 10000;
 #endif
 
 #ifdef DuoTongDao
@@ -190,6 +190,30 @@ void Motor_Data_Init(void)
 	Motor[8].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/100=1KHz
 	Motor[8].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
 	Motor[8].AccelerationTimeTMR = Motor[8].StepperSpeedTMR ; 	// 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
+#endif
+
+#ifdef QuanxiePVctrl
+/*  Motor7 : 加样针24V直流电机  A相-抽出液体0.6L/min */
+	Motor[7].MotorNumber = 7;
+	Motor[7].Status = 0,
+	Motor[7].htim_x = &htim12,
+
+	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
+	Motor[7].StepperSpeedTMR = 400 ;  			// PWM控制直流电机频率：100KHz/100=1KHz
+	Motor[7].NumberofSteps_StopAccel = 100 ; 	// 此参数在直流电机应用下，定义为占空比
+	Motor[7].AccelerationTimeTMR = Motor[7].StepperSpeedTMR ; 	// 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
+	Motor[7].DecelerationTimeTMR = 100 ; // 定义为看空比设置最大值
+
+/*  Motor8 : 加样针24V直流电机  A相针内壁清洗  B相针外壁清洗  */
+	Motor[8].MotorNumber = 8;
+	Motor[8].Status = 0,
+	Motor[8].htim_x = &htim12,
+
+	//设定默认的PWM控制频率，设置占空比来控制直流电机输出
+	Motor[8].StepperSpeedTMR = 10000 ;  		// PWM控制直流电机频率：100KHz/100=1KHz
+	Motor[8].NumberofSteps_StopAccel = 10000 ; 	// 此参数在直流电机应用下，定义为占空比
+	Motor[8].AccelerationTimeTMR = Motor[8].StepperSpeedTMR ; 	// 此参数在直流电机应用下，定义实际高电平的TMR计时器个数
+	Motor[8].DecelerationTimeTMR = 10000 ; // 定义为看空比设置最大值
 #endif
 
 #ifdef WeiLiuKong
@@ -917,6 +941,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 			temp->MotorDirection = 1 ;
 			MotorRun_LowSpeed(temp);
 			HAL_Delay(MotorResetDelay);
+			HAL_Delay(MotorResetDelay);
 			for(uint32_t i=0 ; Motor3_reset_OPTstatus ; i++){
 				if(i>500) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
@@ -932,7 +957,7 @@ uint8_t Motor_Reset(struct MotorDefine *temp)
 			temp->MotorDirection = 0 ;
 			MotorRun_LowSpeed(temp);
 			for(uint32_t i=0 ; Motor3_Nreset_OPTstatus ; i++){
-				if(i>12000) {
+				if(i>4000) {
 					printf("[WRONG] Overtime! Reset Motor%d Failed!\r\n",temp->MotorNumber);
 					Motor[temp->MotorNumber].NumberofSteps = 2;
 					return FAIL;
@@ -1162,7 +1187,7 @@ void DC_Motor_ON(struct MotorDefine *temp ,char x, uint32_t Duty_Cycle)
 	}
 
 	Motor[temp->MotorNumber].NumberofSteps_StopAccel = Duty_Cycle;
-	Motor[temp->MotorNumber].AccelerationTimeTMR = Duty_Cycle * Motor[temp->MotorNumber].StepperSpeedTMR / 100 ;
+	Motor[temp->MotorNumber].AccelerationTimeTMR = Duty_Cycle * Motor[temp->MotorNumber].StepperSpeedTMR / Motor[temp->MotorNumber].DecelerationTimeTMR ;
 	HAL_TIM_Base_Start_IT(Motor[temp->MotorNumber].htim_x);
 }
 

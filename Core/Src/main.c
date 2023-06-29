@@ -276,7 +276,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			HAL_TIM_Base_Stop_IT(&htim9);
 		}
 		else{
-			if(uart_reieve_timeoutCount > 1000){
+			if(uart_reieve_timeoutCount > 5000){
 				printf("[WRONG] Data Input Timeout ! \r\n");
 				uart_reieve_timeoutCount = 0;
 				USART_RX_STA = 0;
@@ -431,7 +431,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					break;
 				case 2:
 					timecount_TIM13 = 0 ;
-					//使用IO输出模块进行液面�?????????�?????????
+					//使用IO输出模块进行液面�?????????�?????????
 //					HAL_TIM_Base_Stop_IT(&htim13);
 //					Motor[3].Status = 0;
 					break;
@@ -480,7 +480,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 				else if (Motor[3].NumberofSteps <= 0){
 					Motor[3].Status = 0;
-					//printf("[WRONG]Motor3 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[3].StepPosition);
+					printf("[WRONG]Motor3 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[3].StepPosition);
 					HAL_TIM_Base_Stop_IT(&htim13);
 				}
 
@@ -531,7 +531,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else if (Motor[4].NumberofSteps <= 0){
 				Motor[4].Status = 0;
-				//printf("[WRONG]Motor4 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[4].StepPosition);
+				printf("[WRONG]Motor4 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[4].StepPosition);
 				HAL_TIM_Base_Stop_IT(&htim14);
 			}
 
@@ -1058,6 +1058,86 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 #endif
 
+#ifdef QuanxiePVctrl
+	else if (htim->Instance == TIM12)
+	{
+			timecount_TIM12_DCM7++;
+			timecount_TIM12_DCM8++;
+			if (Motor[7].Status){
+				if(timecount_TIM12_DCM7 <= Motor[7].AccelerationTimeTMR)
+				{
+					switch( Motor[7].Status ){
+					case 0b00000010:
+						VM7_IN1_H();
+						break;
+					case 0b00000001:
+						VM7_IN4_H();
+						break;
+					case 0b00000011:
+						VM7_IN1_H();
+						VM7_IN4_H();
+						break;
+					}
+				}
+				else if(timecount_TIM12_DCM7 > Motor[7].AccelerationTimeTMR)
+				{
+					switch( Motor[7].Status ){
+					case 0b00000010:
+						VM7_IN1_L();
+						break;
+					case 0b00000001:
+						VM7_IN4_L();
+						break;
+					case 0b00000011:
+						VM7_IN1_L();
+						VM7_IN4_L();
+						break;
+					}
+				}
+				if(timecount_TIM12_DCM7 >= Motor[7].StepperSpeedTMR)
+				{
+					timecount_TIM12_DCM7 = 0 ;
+				}
+			}
+
+			if (Motor[8].Status){
+				if(timecount_TIM12_DCM8 <= Motor[8].AccelerationTimeTMR)
+				{
+					switch( Motor[8].Status ){
+					case 0b00000010:
+						VM8_IN1_H();
+						break;
+					case 0b00000001:
+						VM8_IN4_H();
+						break;
+					case 0b00000011:
+						VM8_IN1_H();
+						VM8_IN4_H();
+						break;
+					}
+				}
+				else if(timecount_TIM12_DCM8 > Motor[8].AccelerationTimeTMR)
+				{
+					switch( Motor[8].Status ){
+					case 0b00000010:
+						VM8_IN1_L();
+						break;
+					case 0b00000001:
+						VM8_IN4_L();
+						break;
+					case 0b00000011:
+						VM8_IN1_L();
+						VM8_IN4_L();
+						break;
+					}
+				}
+				if(timecount_TIM12_DCM8 >= Motor[8].StepperSpeedTMR)
+				{
+					timecount_TIM12_DCM8 = 0 ;
+				}
+			}
+	}
+#endif
   /* USER CODE END Callback 1 */
 }
 

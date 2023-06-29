@@ -21,11 +21,12 @@
 #include "ScheduleTable.h"
 #include "FDC2112.h"
 
-uint8_t Follow_state ;
+
 uint8_t DetectionTask_STATE ;
 
 #ifdef JiaYangZhen
 
+uint8_t Follow_state ;
 float Cap_Value[2] ;    		// 直接读出并转换的电容值
 float Cap_Value_Calibrated[2] ;	// 校准后的电容值，正常状态下为0
 float Calibration_Value[2] ;	// 校准值，为常规状态下的电容值均值，计算绝对电容值需要减去该值
@@ -69,101 +70,101 @@ float get_Calibrated_Value(uint8_t index)  // 读取5次取平均
 	return ( Cap_temp_Value - Calibration_Value[index] ) ;
 }
 
-void StartDetectionTask(void *argument)
-{
-	osDelay(50);
-	printf("DetectionTask starts! \r\n");
-
-	Init_DoubleChannel_FDC2212();
-	osDelay(100);
-	DetectionTask_STATE = init_Calibration_Value(0);
-	osDelay(100);
-	DetectionTask_STATE = INITPASSSTATE;
-
-	for(;;)
-	{
-		osDelay(1);
-		switch (DetectionTask_STATE)
-		{
-		case 0:
-			if ( myTask03_Status == INITPASSSTATE){
-				Motor4_SuckInMode(10);
-				DetectionTask_STATE = 1;
-			}
-			osDelay(10);
-			break;
-
-		case 1:
-			if( Motor[4].Status == 0 ){
-				Init_DoubleChannel_FDC2212();
-				osDelay(300);
-				DetectionTask_STATE = init_Calibration_Value(0);
-			}
-			osDelay(10);
-			break;
-
-		case INITPASSSTATE:
-			osDelay(100);
-
-			break;
-
-		case 70:
-//			Init_DoubleChannel_FDC2212();
-//			osDelay(100);
-//			init_Calibration_Value(0);
-//			osDelay(100);
-//			DetectionTask_STATE = INITPASSSTATE;
-			init_Calibration_Value(1);
-			osDelay(200);
-			DetectionTask_STATE = 71;
-			break;
-
-		case 71:
-//			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
-//			printf("%.2f\n",Cap_Value_Calibrated[0]);
+//void StartDetectionTask(void *argument)
+//{
+//	osDelay(50);
+//	printf("DetectionTask starts! \r\n");
+//
+//	Init_DoubleChannel_FDC2212();
+//	osDelay(100);
+//	DetectionTask_STATE = init_Calibration_Value(0);
+//	osDelay(100);
+//	DetectionTask_STATE = INITPASSSTATE;
+//
+//	for(;;)
+//	{
+//		osDelay(1);
+//		switch (DetectionTask_STATE)
+//		{
+//		case 0:
+//			if ( myTask03_Status == INITPASSSTATE){
+//				Motor4_SuckInMode(10);
+//				DetectionTask_STATE = 1;
+//			}
 //			osDelay(10);
-			Cap_Value_Calibrated[1] = get_Calibrated_Value(1);
-			printf("%.2f\r\n",Cap_Value_Calibrated[1]);
-			osDelay(200);
-
-			if(KEY2_Pressed()){
-				DetectionTask_STATE = INITPASSSTATE;
-			}
-			break;
-
-		case Cap0_Sample_State:
-			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
-			if (Cap_Value_Calibrated[0] < 0.05){
-				Motor3_Nreset_direction;
-				Motor[3].StepperSpeedTMR = 33 ;
-				Follow_state = 1;
-			}
-			else if ( (Cap_Value_Calibrated[0] > 0.05) && (Cap_Value_Calibrated[0] <= 0.15) ){
-				Motor3_Nreset_direction;
-				Motor[3].StepperSpeedTMR = 200 ;
-				Follow_state = 1;
-			}
-			else if ( (Cap_Value_Calibrated[0] > 0.15) && (Cap_Value_Calibrated[0] <= 0.4) ){
-				Follow_state = 2;
-			}
-			else {
-				Motor3_reset_direction;
-				Motor[3].StepperSpeedTMR = 200 - 100*(Cap_Value_Calibrated[0]-0.4) ;
-				Follow_state = 3;
-			}
-			//osDelay(1000);
-			break;
-
-		case INITFAILSTATE:
-			printf("[WRONG]init_Calibration_Value FAILED,reCalibrating...\r\n");
-			osDelay(5000);
-			DetectionTask_STATE = init_Calibration_Value(0);
-
-		}
-
-	}
-
-}
+//			break;
+//
+//		case 1:
+//			if( Motor[4].Status == 0 ){
+//				Init_DoubleChannel_FDC2212();
+//				osDelay(300);
+//				DetectionTask_STATE = init_Calibration_Value(0);
+//			}
+//			osDelay(10);
+//			break;
+//
+//		case INITPASSSTATE:
+//			osDelay(100);
+//
+//			break;
+//
+//		case 70:
+////			Init_DoubleChannel_FDC2212();
+////			osDelay(100);
+////			init_Calibration_Value(0);
+////			osDelay(100);
+////			DetectionTask_STATE = INITPASSSTATE;
+//			init_Calibration_Value(1);
+//			osDelay(200);
+//			DetectionTask_STATE = 71;
+//			break;
+//
+//		case 71:
+////			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
+////			printf("%.2f\n",Cap_Value_Calibrated[0]);
+////			osDelay(10);
+//			Cap_Value_Calibrated[1] = get_Calibrated_Value(1);
+//			printf("%.2f\r\n",Cap_Value_Calibrated[1]);
+//			osDelay(200);
+//
+//			if(KEY2_Pressed()){
+//				DetectionTask_STATE = INITPASSSTATE;
+//			}
+//			break;
+//
+//		case Cap0_Sample_State:
+//			Cap_Value_Calibrated[0] = get_Calibrated_Value(0);
+//			if (Cap_Value_Calibrated[0] < 0.05){
+//				Motor3_Nreset_direction;
+//				Motor[3].StepperSpeedTMR = 33 ;
+//				Follow_state = 1;
+//			}
+//			else if ( (Cap_Value_Calibrated[0] > 0.05) && (Cap_Value_Calibrated[0] <= 0.15) ){
+//				Motor3_Nreset_direction;
+//				Motor[3].StepperSpeedTMR = 200 ;
+//				Follow_state = 1;
+//			}
+//			else if ( (Cap_Value_Calibrated[0] > 0.15) && (Cap_Value_Calibrated[0] <= 0.4) ){
+//				Follow_state = 2;
+//			}
+//			else {
+//				Motor3_reset_direction;
+//				Motor[3].StepperSpeedTMR = 200 - 100*(Cap_Value_Calibrated[0]-0.4) ;
+//				Follow_state = 3;
+//			}
+//			//osDelay(1000);
+//			break;
+//
+//		case INITFAILSTATE:
+//			printf("[WRONG]init_Calibration_Value FAILED,reCalibrating...\r\n");
+//			osDelay(5000);
+//			DetectionTask_STATE = init_Calibration_Value(0);
+//
+//		}
+//
+//	}
+//
+//}
 
 #endif
 #ifdef DushuModule
@@ -247,6 +248,8 @@ void StartDetectionTask(void *argument)
 	}
 }
 #endif
+
+
 
 
 

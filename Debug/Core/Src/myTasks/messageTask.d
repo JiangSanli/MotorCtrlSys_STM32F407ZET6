@@ -55,7 +55,8 @@ Core/Src/myTasks/messageTask.o: ../Core/Src/myTasks/messageTask.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  ../Core/Inc/can.h ../Core/Inc/i2c.h ../Core/Inc/tim.h \
- ../Core/Inc/usart.h ../Core/Inc/gpio.h
+ ../Core/Inc/usart.h ../Core/Inc/gpio.h \
+ D:/STM32CubeIDE_1.9.0/workspace/MotorCtrlSys_STM32F407ZET6/Core/Inc/myBSP/pid.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -119,3 +120,4 @@ D:/STM32CubeIDE_1.9.0/workspace/MotorCtrlSys_STM32F407ZET6/Core/Inc/myBSP/Schedu
 ../Core/Inc/tim.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/gpio.h:
+D:/STM32CubeIDE_1.9.0/workspace/MotorCtrlSys_STM32F407ZET6/Core/Inc/myBSP/pid.h:

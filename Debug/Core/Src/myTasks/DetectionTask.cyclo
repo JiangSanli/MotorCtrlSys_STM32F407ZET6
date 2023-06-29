@@ -1,3 +1,0 @@
-DetectionTask.c:33:9:init_Calibration_Value	3
-DetectionTask.c:53:7:get_Calibrated_Value	3
-DetectionTask.c:72:6:StartDetectionTask	19

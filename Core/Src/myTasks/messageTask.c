@@ -18,10 +18,13 @@
 #include "gpio.h"
 #include "stdio.h"
 #include "MotorCtrl.h"
+#include "string.h"
+#include "pid.h"
 
 #ifndef DushuModule
-struct  MotorDefine Motor_Temp ;
+#ifndef QuanxiePVctrl
 
+struct  MotorDefine Motor_Temp ;
 void deal_buffer_motorCtrl_data(struct MotorDefine *a)
 {
 	a->MotorNumber = USART5_RX_BUF[1];
@@ -155,8 +158,10 @@ void StartmessageTask(void *argument)
 		}
 	}
 }
+#endif
+#endif
 
-#else
+#ifdef DushuModule
 void StartmessageTask(void *argument)
 {
 	osDelay(20);
@@ -169,6 +174,182 @@ void StartmessageTask(void *argument)
 	    	med32 = ((USART5_RX_BUF[1] << 24) | (USART5_RX_BUF[2] << 16) | (USART5_RX_BUF[3] << 8) | (USART5_RX_BUF[4]));
 	    	printf("%ld\n", med32);
 	    	USART_RX_STA=0;
+		}
+	}
+}
+#endif
+
+
+#ifdef	QuanxiePVctrl
+float Char_to_Float(char *str)
+{
+    float n = 0.0;
+    float tmp = 10.0;
+    int flag = 0;
+    assert(str);
+    if(*str == '-')
+    {
+        flag = 1;
+        str++;
+    }
+    while(*str >= '0' && *str <= '9')
+    {
+        n = n*10 + (*str - '0');
+        str++;
+    }
+    if(*str == '.')
+    {
+        str++;
+        while(*str >= '0' && *str <= '9')
+        {
+            n = n + (*str -'0')/tmp;;
+            tmp = tmp * 10;
+            str++;
+        }
+    }
+    if(flag == 1)
+    {
+        n = -n;
+    }
+    return n;
+}
+
+float uint8_to_Float(uint8_t *buf)
+{
+    float n = 0.0;
+    float tmp = 10.0;
+    int flag = 0;
+    if(*buf == 0x2D)
+    {
+        flag = 1;
+        buf++;
+    }
+    while(*buf >= 0x30 && *buf <= 0x39)
+    {
+        n = n*10 + (*buf - 0x30);
+        buf++;
+    }
+    if(*buf == 0x2E)
+    {
+        buf++;
+        while(*buf >= 0x30 && *buf <= 0x39)
+        {
+            n = n + (*buf - 0x30)/tmp;;
+            tmp = tmp * 10;
+            buf++;
+        }
+    }
+    if(flag == 1)
+    {
+        n = -n;
+    }
+    return n;
+}
+
+float SetValue_Update ;
+void Get_Char_SetValue(char *str , uint8_t len)
+{
+	char temp[10] = {0};
+	uint8_t a=0;
+	uint8_t b=0;
+	for(uint8_t i=0 ; i<len ; i++){
+		if(str[i] == 'v'){
+			a = i+2 ;
+		}
+		else if(str[i] == ','){
+			b = i-1 ;
+			break;
+		}
+	}
+	if ( a && b){
+		for(uint8_t j=0 ; j<(b-a+1) ; j++){
+			temp[j] = str[a+j] ;
+		}
+		SetValue_Update = Char_to_Float(temp) ;
+	}
+}
+
+float pid_Update[3];
+void Get_Char_p_i_d(char *str , uint8_t len)
+{
+	char temp_p[10] = {0};
+	char temp_i[10] = {0};
+	char temp_d[10] = {0};
+	uint8_t num_p,num_i,num_d;
+	num_p=num_i=num_d=0;
+	uint8_t num_p_end,num_i_end,num_d_end;
+	num_p_end=num_i_end=num_d_end=0;
+
+	for(uint8_t i=0 ; i<len ; i++){
+		if(str[i] == 'p'){
+			num_p = i+2 ;
+		}
+		if (num_p && (str[i] == ',')){
+			num_p_end = i-1 ;
+		}
+	}
+	for(uint8_t i=0 ; i<len ; i++){
+		if(str[i] == 'i'){
+			num_i = i+2 ;
+		}
+		if (num_i && (str[i] == ',')){
+			num_i_end = i-1 ;
+		}
+	}
+	for(uint8_t i=0 ; i<len ; i++){
+		if(str[i] == 'd'){
+			num_d = i+2 ;
+		}
+		if (num_d && (str[i] == ',')){
+			num_d_end = i-1 ;
+		}
+	}
+
+	if ( num_p && num_p_end){
+		for(uint8_t j=0 ; j<(num_p_end-num_p+1) ; j++){
+			temp_p[j] = str[num_p+j] ;
+		}
+		pid_Update[0]=Char_to_Float(temp_p);
+	}
+	if ( num_i && num_i_end){
+		for(uint8_t j=0 ; j<(num_i_end-num_i+1) ; j++){
+			temp_i[j] = str[num_i+j] ;
+		}
+		pid_Update[1]=Char_to_Float(temp_i);
+	}
+	if ( num_d && num_d_end){
+		for(uint8_t j=0 ; j<(num_d_end-num_d+1) ; j++){
+			temp_d[j] = str[num_d+j] ;
+		}
+		pid_Update[2]=Char_to_Float(temp_d);
+	}
+}
+
+
+
+
+void StartmessageTask(void *argument)
+{
+	osDelay(20);
+	uint8_t rx5_len = 0;
+
+	printf("messageTask starts! \r\n");
+
+
+	for(;;){
+		osDelay(10);
+
+	    if(USART_RX_STA&0x8000)
+		{
+	    	rx5_len = USART_RX_STA&0x3fff;
+	    	Get_Char_SetValue(USART5_RX_BUF,rx5_len);
+	    	Get_Char_p_i_d(USART5_RX_BUF,rx5_len);
+	    	printf("SetValue_Update: %.4f \r\n",SetValue_Update);
+	    	printf("pid_Update:  P=%.4f  I=%.4f  D=%.4f \r\n",pid_Update[0],pid_Update[1],pid_Update[2]);
+	    	PID_Clear(&pid1);
+	    	PID_Init(&pid1,pid_Update[0],pid_Update[1],pid_Update[2],10000,10000);
+	    	USART_RX_STA = 0;
+
 		}
 	}
 }

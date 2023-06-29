@@ -19,6 +19,8 @@
 #include "MotorCtrl.h"
 #include "ScheduleTable.h"
 #include "FDC2112.h"
+#include <PressureSensor.h>
+#include <pid.h>
 
 uint8_t myTask03_Status ;
 
@@ -275,17 +277,18 @@ void StartTask03(void *argument)
 
 	Motor_Data_Init();
 	osDelay(100);
-//	if ( 0b00001110 == ALL_Motors_Init(0b00001110) ){
-//		printf("Motors Initialization Completed! \r\n");
-//		myTask03_Status = INITPASSSTATE;
-//	}
-//	else{
-//		myTask03_Status = INITFAILSTATE;
-//	}
-	Motor1_Enable();
+	if ( 0b00001100 == ALL_Motors_Init(0b00001100) ){
+		printf("Motors Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
+
 	Motor2_Enable();
 	Motor3_Enable();
-	myTask03_Status = INITPASSSTATE;
+	Motor4_Enable();
+	//myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -330,90 +333,45 @@ void StartTask03(void *argument)
 			break;
 
 		case 10:
-			if (Motor[2].Status == 0){
-				MotorMove_position(&Motor[2],82*16);	//1312试剂盒位置
-				Motor4_SuckInMode(10);
+			if ( (Motor[3].Status == 0) && (Motor[4].Status == 0) ){
+				MotorMove_position(&Motor[3],108*16);
 				myTask03_Status = 11;
 			}
 			osDelay(10);
 			break;
 
 		case 11:
-			if ( (Motor[2].Status == 0) && (Motor[4].Status == 0) ){
-				DetectionTask_STATE = Cap0_Sample_State;
-				//使用IO液面检测模块
-//				Follow_state = 1;
-//				Motor3_Nreset_direction;
-				printf("---Enter Liquid following mode---\r\n");
-				Motor[3].Status = 1;
-				HAL_TIM_Base_Start_IT(Motor[3].htim_x);
+			if ( (Motor[3].Status == 0) && (Motor[4].Status == 0) ){
+				Motor4_SuckInMode(100);
 				myTask03_Status = 12;
 			}
 			osDelay(10);
 			break;
 
 		case 12:
-			for (uint32_t t=1 ; Follow_state == 2 ; t++ ){
-				osDelay(1);
-				if(t > 50){
-					Motor4_SuckInMode(230);
-					myTask03_Status = 13;
-					break;
-				}
+			if ( (Motor[3].Status == 0) && (Motor[4].Status == 0) ){
+				osDelay(2000);
+				myTask03_Status = 13;
 			}
-//			if (Motor[3].Status == 0){
-//				DetectionTask_STATE = INITPASSSTATE;
-//				Motor4_SuckInMode(200);
-//				myTask03_Status = 13;
-//			}
 			osDelay(10);
 			break;
 
 		case 13:
-			if (Motor[4].Status == 0){
-				HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
-				Motor[3].Status = 0;
-				DetectionTask_STATE = INITPASSSTATE;
-				printf("---Close Liquid following mode---\r\n");
-				osDelay(200);
-				MotorMove_position(&Motor[3],-40);
+			if ( (Motor[3].Status == 0) && (Motor[4].Status == 0) ){
+				MotorMove_position(&Motor[3],-2*16);
 				myTask03_Status = 14;
 			}
 			osDelay(10);
 			break;
 
 		case 14:
-			if (Motor[3].Status == 0){
-				MotorMove_position(&Motor[2],134*16); 	// 2144第一个反应杯位置
-				myTask03_Status = 15;
+			if ( (Motor[3].Status == 0) && (Motor[4].Status == 0) ){
+				MotorMove_position(&Motor[4],0);
+				myTask03_Status = INITPASSSTATE;
 			}
 			osDelay(10);
 			break;
 
-		case 15:
-			if (Motor[2].Status == 0){
-				MotorMove_position(&Motor[3],144*16);
-				myTask03_Status = 16;
-			}
-			osDelay(10);
-			break;
-
-		case 16:
-			if (Motor[3].Status == 0){
-				Motor4_PushOutMode(230);
-				osDelay(2000);
-				myTask03_Status = 17;
-			}
-			osDelay(10);
-			break;
-
-		case 17:
-			if (Motor[3].Status == 0){
-				MotorMove_position(&Motor[3],-40);
-				myTask03_Status = 118;
-			}
-			osDelay(10);
-			break;
 
 		case 118:
 			if ( (Motor[3].Status == 0) && (Motor[2].Status == 0) ){
@@ -475,10 +433,6 @@ void StartTask03(void *argument)
 
 
 		case 20:
-			DetectionTask_STATE = 70;
-			printf("---Capture Cap Value Begin---\r\n");
-//			Motor[3].Status = 1;
-//			HAL_TIM_Base_Start_IT(Motor[3].htim_x);
 			myTask03_Status = INITPASSSTATE;
 			break;
 
@@ -486,10 +440,6 @@ void StartTask03(void *argument)
 			OUT1_ON();	// 加样针外壁清洗排除液体电磁阀
 			OUT2_ON();	// 加样针外壁清洗注入液体电磁阀
 			OUT5_ON();	// 柱塞泵加入液体电磁阀
-//			HAL_TIM_Base_Stop_IT(Motor[3].htim_x);
-//			Motor[3].Status = 0;
-//			DetectionTask_STATE = INITPASSSTATE;
-//			printf("---Checking following mode Over!---\r\n");
 			myTask03_Status = INITPASSSTATE;
 			break;
 
@@ -1140,6 +1090,106 @@ void StartTask03(void *argument)
 		}
 	}
 }
+
+#endif
+
+#ifdef QuanxiePVctrl
+
+extern float SetValue_Update ;
+extern float pid_Update[3];
+
+void StartTask03(void *argument)
+{
+	osDelay(10);
+	printf("myTask03 starts! \r\n");
+
+	Motor_Data_Init();
+	osDelay(100);
+	if ( Init_SSCDANT250K_Pressure() ){
+		printf("I2C Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
+
+	SetValue_Update = 82.5 ;// target
+	pid_Update[0] = 80 ; 	// kp
+	pid_Update[1] = 0.3 ; 	// ki
+	pid_Update[2] = 20 ; 	// kd
+
+	PID_Clear(&pid1);
+	HAL_Delay(1);
+	PID_Init(&pid1,pid_Update[0],pid_Update[1],pid_Update[2],10000,10000);
+
+	for(;;)
+	{
+		osDelay(1);
+		switch (myTask03_Status)
+		{
+		case INITPASSSTATE:
+			osDelay(10);
+			if(KEY0_Pressed()){
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					myTask03_Status = 10;
+					printf("Key0 pressed!\r\n");
+				}
+			}
+			if(KEY1_Pressed()){
+				osDelay(20);
+				if(KEY1_Pressed())
+				{
+					osDelay(20);
+					while (KEY1_Pressed()){osDelay(1);}
+					myTask03_Status = 20;
+					printf("Key1 pressed!\r\n");
+				}
+			}
+			if(KEY2_Pressed()){
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 30;
+					printf("Key2 pressed!\r\n");
+				}
+			}
+			break;
+
+		case 10:
+			Pressure_Data_Float = Read_Pressure_Average_ntimes(3) ;
+			myTask03_Status = 11;
+		break;
+
+		case 11:
+			PID_SingleCalc(&pid1, SetValue_Update, Pressure_Data_Float);
+			DC_Motor_ON(&Motor[8],'A',pid1.output);
+			myTask03_Status = 12;
+		break;
+
+		case 12:
+			//printf("%.2f,%f\r\n",Pressure_Data_Float,pid1.output);
+			printf("%.2f\r\n",Pressure_Data_Float);
+			myTask03_Status = 10;
+		break;
+
+
+		case INITFAILSTATE:
+			printf("[WRONG]IIC Initialization FAILED!Please Check!\r\n");
+			osDelay(10000);
+			break;
+
+		}
+	}
+
+}
+
+
 
 
 
