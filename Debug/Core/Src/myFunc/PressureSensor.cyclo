@@ -1,4 +1,0 @@
-PressureSensor.c:8:9:Init_SSCDANT250K_Pressure	2
-PressureSensor.c:22:10:Read_Pressure_Digital	2
-PressureSensor.c:35:7:Read_Pressure_Print_Float	2
-PressureSensor.c:49:7:Read_Pressure_Average_ntimes	3

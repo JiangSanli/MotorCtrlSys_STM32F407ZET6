@@ -159,6 +159,7 @@ int main(void)
 
   /* Start scheduler */
   osKernelStart();
+
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -240,7 +241,7 @@ uint32_t AccelDecelcount_TIM7 = 0;
 #ifdef L298N_StepMotorCtrl
 int  Motor6_State = 0 ;
 #else
-uint8_t  Motor6_State = 1 ;
+int  Motor6_State = 1 ;
 #endif
 
 //直流电机控制
@@ -431,7 +432,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					break;
 				case 2:
 					timecount_TIM13 = 0 ;
-					//使用IO输出模块进行液面�?????????�?????????
+					//使用IO输出模块进行液面�??????????�??????????
 //					HAL_TIM_Base_Stop_IT(&htim13);
 //					Motor[3].Status = 0;
 					break;
@@ -639,7 +640,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 	}
 
-#ifdef L298N_StepMotorCtrl
 	else if (htim->Instance == TIM7)
 	{
 			timecount_TIM7++;
@@ -699,7 +699,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				else if (Motor[6].NumberofSteps <= 0){
 					Motor[6].Status = 0;
 					Motor6_Release();
-					//printf("[WRONG]Motor6 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[6].StepPosition);
+					printf("[WRONG]Motor6 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[6].StepPosition);
 					HAL_TIM_Base_Stop_IT(&htim7);
 				}
 			}
@@ -717,94 +717,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				}
 			}
 	}
-#else
-	else if (htim->Instance == TIM7)
-	{
-			timecount_TIM7++;
-			AccelDecelcount_TIM7++;
-
-			if(timecount_TIM7 >= Motor[6].StepperSpeedTMR)
-			{
-				timecount_TIM7 = 0 ;
-				Motor[6].NumberofSteps--;
-
-				if (Motor[6].MotorDirection == 1){
-					switch ( Motor6_State )
-					{
-					case 1:
-						Motor6_AB();
-						Motor6_State = 2 ;
-						break;
-					case 2:
-						Motor6_Ab();
-						Motor6_State = 3 ;
-						break;
-					case 3:
-						Motor6_ab();
-						Motor6_State = 4 ;
-						break;
-					case 4:
-						Motor6_aB();
-						Motor6_State = 1 ;
-						break;
-					}
-				}
-				else{
-					switch ( Motor6_State )
-					{
-					case 1:
-						Motor6_AB();
-						Motor6_State = 2 ;
-						break;
-					case 2:
-						Motor6_aB();
-						Motor6_State = 3 ;
-						break;
-					case 3:
-						Motor6_ab();
-						Motor6_State = 4 ;
-						break;
-					case 4:
-						Motor6_Ab();
-						Motor6_State = 1 ;
-						break;
-					}
-				}
-
-				if (Motor[6].MotorDirection == 1){
-					Motor[6].StepPosition++;
-				}
-				else{
-					Motor[6].StepPosition--;
-				}
-			}
-			if(Motor[6].StepPosition == Motor[6].TargetPosition){
-				Motor[6].Status = 0;
-				Motor6_Release();
-				printf("---Motor[6] Steps Position:%ld---\r\n",Motor[6].StepPosition);
-				HAL_TIM_Base_Stop_IT(&htim7);
-			}
-			else if (Motor[6].NumberofSteps <= 0){
-				Motor[6].Status = 0;
-				Motor6_Release();
-				//printf("[WRONG]Motor6 Goto Target Position Failed!---Current_Position:%ld---\r\n",Motor[6].StepPosition);
-				HAL_TIM_Base_Stop_IT(&htim7);
-			}
-
-			if (Motor[6].NumberofSteps > Motor[6].NumberofSteps_StopAccel){
-				if(AccelDecelcount_TIM7 >= Motor[6].AccelerationTimeTMR){
-					AccelDecelcount_TIM7=0;
-					AccelDecel(ACCEL,&Motor[6]);
-				}
-			}
-			else if (Motor[6].NumberofSteps < Motor[6].NumberofSteps_BeginDecel){
-				if(AccelDecelcount_TIM7 >= Motor[6].DecelerationTimeTMR){
-					AccelDecelcount_TIM7=0;
-					AccelDecel(DECEL,&Motor[6]);
-				}
-			}
-	}
-#endif
 
 
 #ifdef WeiLiuKong

@@ -15,11 +15,11 @@
 //#define JiaYangZhen 	// 加样针模块控制，两个42步进电机，不适用编码器控制采用编码器闭环控制
 //#define RZ_stepmotor	// RZ步进电机
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
-//#define WeiLiuKong		// 微流控小5V步进电机
+#define WeiLiuKong		// 微流控小5V步进电机
 //#define DushuModule		// PMT读数模块
 //#define L298N_StepMotorCtrl
 //#define DuoTongDao
-#define	QuanxiePVctrl
+//#define QuanxiePVctrl
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
@@ -111,12 +111,13 @@ extern uint8_t myTask03_Status;
 #define Motor4_reset_OPTstatus		OPT4_OFF()
 #define Motor4_Nreset_OPTstatus		OPT4_ON()
 
+#ifdef WeiLiuKong
+#define Motor5_reset_OPTstatus		OPT9_OFF()
+#define Motor5_Nreset_OPTstatus		OPT9_ON()
 
-#define Motor5_reset_OPTstatus		OPT5_ON()
-#define Motor5_Nreset_OPTstatus		OPT5_OFF()
-
-#define Motor6_reset_OPTstatus		OPT6_ON()
-#define Motor6_Nreset_OPTstatus		OPT6_OFF()
+#define Motor6_reset_OPTstatus		OPT10_ON()
+#define Motor6_Nreset_OPTstatus		OPT10_OFF()
+#endif
 
 #ifdef DuoTongDao
 #define Strip_Triggerd				OPT12_ON()

@@ -1,7 +1,0 @@
-../Core/Src/myFunc/FDC2112.c:21:6:FDC2112_Write_Reg_I2C	40	static
-../Core/Src/myFunc/FDC2112.c:34:10:FDC2112_Read_Reg_I2C	40	static
-../Core/Src/myFunc/FDC2112.c:66:10:FDC2112_Read_Data_I2C	40	static
-../Core/Src/myFunc/FDC2112.c:98:10:FDC2112_Read_Data_I2C_CH	24	static
-../Core/Src/myFunc/FDC2112.c:126:6:Init_SingleChannel_FDC2212_CH0	8	static
-../Core/Src/myFunc/FDC2112.c:141:6:Init_DoubleChannel_FDC2212	8	static
-../Core/Src/myFunc/FDC2112.c:172:7:Cap_Calculate	24	static

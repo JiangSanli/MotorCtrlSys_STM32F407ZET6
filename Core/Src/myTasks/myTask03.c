@@ -462,14 +462,19 @@ void StartTask03(void *argument)
 	printf("myTask03 starts! \r\n");
 
 	Motor_Data_Init();
-	osDelay(100);
-	if ( 0b00110000 == ALL_Motors_Init(0b00110000) ){
-		printf("Motors Initialization Completed! \r\n");
-		myTask03_Status = INITPASSSTATE;
-	}
-	else{
-		myTask03_Status = INITFAILSTATE;
-	}
+//	if ( 0b00110000 == ALL_Motors_Init(0b00110000) ){
+//		printf("Motors Initialization Completed! \r\n");
+//		myTask03_Status = INITPASSSTATE;
+//	}
+//	else{
+//		myTask03_Status = INITFAILSTATE;
+//	}
+
+	VM5_Enable_A();	VM5_Enable_B();
+	VM6_Enable_A();	VM6_Enable_B();
+	Motor6_Release();
+	Motor6_MicroSteps_Table_Init();
+	myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -1113,6 +1118,7 @@ void StartTask03(void *argument)
 		myTask03_Status = INITFAILSTATE;
 	}
 
+	static uint32_t cnt1 = 0;
 	SetValue_Update = 82.5 ;// target
 	pid_Update[0] = 80 ; 	// kp
 	pid_Update[1] = 0.3 ; 	// ki
@@ -1163,6 +1169,15 @@ void StartTask03(void *argument)
 
 		case 10:
 			Pressure_Data_Float = Read_Pressure_Average_ntimes(3) ;
+			if(Pressure_Data_Float>98.0){
+				cnt1++;
+				if(cnt1>10){
+					PID_Clear(&pid1);
+					cnt1 = 0;
+				}
+			}else{
+				cnt1 = 0;
+			}
 			myTask03_Status = 11;
 		break;
 

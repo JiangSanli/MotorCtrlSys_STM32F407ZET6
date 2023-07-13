@@ -11,6 +11,8 @@
 extern uint32_t TPMark[14];
 extern uint32_t VPMark[8];
 
+#define VM6_Full_Current 1	//x100mA,乘以细分表100%后，200mA系数为2
+
 extern int Motor6_MicroSteps[32][3];
 extern uint16_t Motor6_MicroSteps_Increment ;
 extern struct DuoTongDao_SetPositionData data_V0 ;

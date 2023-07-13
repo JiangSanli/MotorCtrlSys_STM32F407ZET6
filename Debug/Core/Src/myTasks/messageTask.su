@@ -1,5 +1,0 @@
-../Core/Src/myTasks/messageTask.c:184:7:Char_to_Float	32	static
-../Core/Src/myTasks/messageTask.c:217:7:uint8_to_Float	32	static
-../Core/Src/myTasks/messageTask.c:250:6:Get_Char_SetValue	32	static
-../Core/Src/myTasks/messageTask.c:273:6:Get_Char_p_i_d	64	static
-../Core/Src/myTasks/messageTask.c:331:6:StartmessageTask	56	static

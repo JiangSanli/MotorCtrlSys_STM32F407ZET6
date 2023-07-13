@@ -1,3 +1,0 @@
-../Core/Src/myFunc/ScheduleTable.c:14:6:Turntable_Position_Init	4	static
-../Core/Src/myFunc/ScheduleTable.c:73:6:Motor6_MicroSteps_Table_Init	4	static
-../Core/Src/myFunc/ScheduleTable.c:84:6:DuoTongDao_Position_Init	4	static

@@ -1,3 +1,0 @@
-pid.c:8:6:PID_Init	1
-pid.c:17:6:PID_Clear	1
-pid.c:25:6:PID_SingleCalc	5
