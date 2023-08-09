@@ -35,7 +35,7 @@ void Motor_Data_Init(void)
 	//机械参数
 	Motor[2].deceleration_ratio = 1;
 	Motor[2].step_angle = 1.8;
-	Motor[2].mircro_steps = 4;
+	Motor[2].mircro_steps = 8;
 	Motor[2].MaxSpeedInRads= 25;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[2].StartupSpeedInRads = 2;

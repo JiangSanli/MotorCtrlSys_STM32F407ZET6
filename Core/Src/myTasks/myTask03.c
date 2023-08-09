@@ -35,13 +35,22 @@ void StartTask03(void *argument)
 	Motor_Data_Init();
 	Turntable_Position_Init();
 	osDelay(100);
-	if ( 0b00001011 == ALL_Motors_Init(0b00001011) ){
-		printf("Motors Initialization Completed! \r\n");
-		myTask03_Status = INITPASSSTATE;
-	}
-	else{
-		myTask03_Status = INITFAILSTATE;
-	}
+//	if ( 0b00001011 == ALL_Motors_Init(0b00001011) ){
+//		printf("Motors Initialization Completed! \r\n");
+//		myTask03_Status = INITPASSSTATE;
+//	}
+//	else{
+//		myTask03_Status = INITFAILSTATE;
+//	}
+
+		if ( 0b00000011 == ALL_Motors_Init(0b00000011) ){
+			printf("Motors Initialization Completed! \r\n");
+			myTask03_Status = INITPASSSTATE;
+		}
+		else{
+			myTask03_Status = INITFAILSTATE;
+		}
+	myTask03_Status = INITPASSSTATE;
 
 	for(;;)
 	{
@@ -49,7 +58,8 @@ void StartTask03(void *argument)
 		switch (myTask03_Status)
 		{
 		case INITPASSSTATE:
-			myTask03_Status = 0;
+			osDelay(100);
+			//myTask03_Status = 0;
 			break;
 
 		case 0:

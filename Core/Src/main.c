@@ -43,7 +43,7 @@
 
 PUTCHAR_PROTOTYPE
 {
-	HAL_UART_Transmit(&huart3, (uint8_t*)&ch,1,HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)&ch,1,HAL_MAX_DELAY);
     return ch;
 }
 /* USER CODE END PTD */
@@ -432,7 +432,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					break;
 				case 2:
 					timecount_TIM13 = 0 ;
-					//使用IO输出模块进行液面�??????????�??????????
+					//使用IO输出模块进行液面�??????????�??????????
 //					HAL_TIM_Base_Stop_IT(&htim13);
 //					Motor[3].Status = 0;
 					break;

@@ -125,7 +125,7 @@ void MX_FREERTOS_Init(void) {
   myTask03Handle = osThreadNew(StartTask03, NULL, &myTask03_attributes);
 
   /* creation of DetectionTask */
-  DetectionTaskHandle = osThreadNew(StartDetectionTask, NULL, &DetectionTask_attributes);
+  //DetectionTaskHandle = osThreadNew(StartDetectionTask, NULL, &DetectionTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

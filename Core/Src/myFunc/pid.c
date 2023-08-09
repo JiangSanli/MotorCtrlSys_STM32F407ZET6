@@ -39,3 +39,7 @@ void PID_SingleCalc(struct _PID *pid,float SetValue,float feedback)
 	//输出限幅
 	LIMIT(pid->output,-pid->maxOutput,pid->maxOutput);
 }
+
+
+
+
