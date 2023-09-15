@@ -271,20 +271,36 @@ void Motor_Data_Init(void)
 #endif
 
 #ifdef L298N_StepMotorCtrl
+
+/*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动  理想速度：20rads/s 导程0.5mm/rad 行进速度:10mm/s */
+	Motor[5].MotorNumber = 5;
+	Motor[5].Status = 0;
+	Motor[5].htim_x = &htim6;
+	//机械参数
+	Motor[5].deceleration_ratio = 10;
+	Motor[5].step_angle = 18;
+	Motor[5].mircro_steps = 1;
+	Motor[5].MaxSpeedInRads= 255;
+	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
+	Motor[5].StartupSpeedInRads = 1;
+	Motor[5].DesiredSpeedInRads = 10;
+	Motor[5].accelerationRate = 10000;
+	Motor[5].decelerationRate = 10000;
+
 /*  Motor6 : 微流控5V小电机-旋转电机，垂直上下运动  理想速度：20rads/s 导程0.5mm/rad 行进速度:10mm/s */
 	Motor[6].MotorNumber = 6;
 	Motor[6].Status = 0;
 	Motor[6].htim_x = &htim7;
 	//机械参数
-	Motor[6].deceleration_ratio = 25;
+	Motor[6].deceleration_ratio = 1;
 	Motor[6].step_angle = 18;
 	Motor[6].mircro_steps = 8;
-	Motor[6].MaxSpeedInRads= 100;
+	Motor[6].MaxSpeedInRads= 255;
 	//设定默认速度参数，以下为实测优化后结果，可以通过参数控制模式修改
 	Motor[6].StartupSpeedInRads = 5;
 	Motor[6].DesiredSpeedInRads = 20;
-	Motor[6].accelerationRate = 20000;
-	Motor[6].decelerationRate = 20000;
+	Motor[6].accelerationRate = 10000;
+	Motor[6].decelerationRate = 10000;
 #endif
 }
 

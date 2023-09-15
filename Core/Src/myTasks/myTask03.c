@@ -894,19 +894,19 @@ void StartTask03(void *argument)
 	Motor_Data_Init();
 	DuoTongDao_Position_Init();
 	osDelay(300);
-	if ( DTD_Motors_Init() ){
-		printf("Motors Initialization Completed! \r\n");
-		myTask03_Status = INITPASSSTATE;
-	}
-	else{
-		myTask03_Status = INITFAILSTATE;
-	}
+//	if ( DTD_Motors_Init() ){
+//		printf("Motors Initialization Completed! \r\n");
+//		myTask03_Status = INITPASSSTATE;
+//	}
+//	else{
+//		myTask03_Status = INITFAILSTATE;
+//	}
 
 //	Motor2_Enable();
 //	Motor3_Enable();
-//	VM5_Enable_A();	VM5_Enable_B();
-//	VM6_Enable_A();	VM6_Enable_B();
-//	myTask03_Status = INITPASSSTATE;
+	VM5_Enable_A();	VM5_Enable_B();
+	VM6_Enable_A();	VM6_Enable_B();
+	myTask03_Status = INITFAILSTATE;
 
 	uint8_t temp_n = 0 ;
 

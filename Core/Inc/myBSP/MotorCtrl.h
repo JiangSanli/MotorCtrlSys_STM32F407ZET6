@@ -17,9 +17,9 @@
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
 //#define WeiLiuKong		// 微流控小5V步进电机
 //#define DushuModule		// PMT读数模块
-//#define L298N_StepMotorCtrl
+#define L298N_StepMotorCtrl
 //#define DuoTongDao
-#define QuanxiePVctrl
+//#define QuanxiePVctrl
 
 struct MotorDefine {
 	//电机本身机械参数-固定值
