@@ -17,8 +17,9 @@
 //#define JiaYangZhen_EncoderMode  // 加样针模块编码器控制
 //#define WeiLiuKong		// 微流控小5V步进电机
 //#define DushuModule		// PMT读数模块
-#define L298N_StepMotorCtrl
-//#define DuoTongDao
+//#define L298N_StepMotorCtrl
+//#define ALL_4port_5V
+#define DuoTongDao
 //#define QuanxiePVctrl
 
 struct MotorDefine {
@@ -70,11 +71,11 @@ extern uint8_t myTask03_Status;
 #define INITFAILSTATE 		100
 #define INITPASSSTATE 		99
 
+#ifdef CiFenLi
 #define Motor1_reset_direction 		Motor1_Dir_Forward()   // 磁分离42步进电机
 #define Motor1_Nreset_direction 	Motor1_Dir_Backward()
 #define Motor1_reset_OPTstatus		OPT1_ON()
 #define Motor1_Nreset_OPTstatus		OPT1_OFF()
-#ifdef CiFenLi
 #define Motor2_reset_direction 		Motor2_Dir_Backward()	// 磁分离35步进电机
 #define Motor2_Nreset_direction 	Motor2_Dir_Forward()
 #define Motor2_reset_OPTstatus		OPT2_OFF()
@@ -83,8 +84,13 @@ extern uint8_t myTask03_Status;
 #define Motor3_Nreset_direction 	Motor3_Dir_Backward()
 #define Motor3_reset_OPTstatus		OPT3_ON()
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
-#else
+#endif
+
 #ifdef JiaYangZhen
+#define Motor1_reset_direction 		Motor1_Dir_Forward()   // 磁分离42步进电机
+#define Motor1_Nreset_direction 	Motor1_Dir_Backward()
+#define Motor1_reset_OPTstatus		OPT1_ON()
+#define Motor1_Nreset_OPTstatus		OPT1_OFF()
 #define Motor2_reset_direction 		Motor2_Dir_Backward()	// 加样针模块42步进电机-X方向
 #define Motor2_Nreset_direction 	Motor2_Dir_Forward()
 #define Motor2_reset_OPTstatus		OPT2_ON()
@@ -93,7 +99,13 @@ extern uint8_t myTask03_Status;
 #define Motor3_Nreset_direction 	Motor3_Dir_Forward()
 #define Motor3_reset_OPTstatus		OPT3_OFF()
 #define Motor3_Nreset_OPTstatus		OPT3_ON()
-#else //多通道28电机配置
+#endif //多通道28电机配置
+
+#ifdef DuoTongDao
+#define Motor1_reset_direction 		Motor1_Dir_Forward()   // 磁分离42步进电机
+#define Motor1_Nreset_direction 	Motor1_Dir_Backward()
+#define Motor1_reset_OPTstatus		OPT1_ON()
+#define Motor1_Nreset_OPTstatus		OPT1_OFF()
 #define Motor2_reset_direction 		Motor2_Dir_Backward()	// 多通道Z轴电机向下运动
 #define Motor2_Nreset_direction 	Motor2_Dir_Forward()
 #define Motor2_reset_OPTstatus		OPT2_ON()
@@ -102,20 +114,62 @@ extern uint8_t myTask03_Status;
 #define Motor3_Nreset_direction 	Motor3_Dir_Backward()
 #define Motor3_reset_OPTstatus		OPT3_ON()
 #define Motor3_Nreset_OPTstatus		OPT3_OFF()
+#define Motor5_reset_OPTstatus		OPT5_OFF()
+#define Motor5_Nreset_OPTstatus		OPT5_ON()
+#define Motor6_reset_OPTstatus		OPT6_OFF()
+#define Motor6_Nreset_OPTstatus		OPT6_ON()
+#define Motor7_reset_OPTstatus		OPT7_OFF()
+#define Motor7_Nreset_OPTstatus		OPT7_ON()
 #endif
+
+#ifdef ALL_4port_5V
+#define Motor1_reset_direction 		Motor1_Dir_Forward()
+#define Motor1_Nreset_direction 	Motor1_Dir_Backward()
+#define Motor1_reset_OPTstatus		OPT1_OFF()
+#define Motor1_Nreset_OPTstatus		OPT1_ON()
+#define Motor2_reset_direction 		Motor2_Dir_Forward()
+#define Motor2_Nreset_direction 	Motor2_Dir_Backward()
+#define Motor2_reset_OPTstatus		OPT2_OFF()
+#define Motor2_Nreset_OPTstatus		OPT2_ON()
+#define Motor3_reset_direction 		Motor3_Dir_Forward()
+#define Motor3_Nreset_direction 	Motor3_Dir_Backward()
+#define Motor3_reset_OPTstatus		OPT3_OFF()
+#define Motor3_Nreset_OPTstatus		OPT3_ON()
+#define Motor5_reset_OPTstatus		OPT5_OFF()
+#define Motor5_Nreset_OPTstatus		OPT5_ON()
+#define Motor6_reset_OPTstatus		OPT6_OFF()
+#define Motor6_Nreset_OPTstatus		OPT6_ON()
+#define Motor7_reset_OPTstatus		OPT7_OFF()
+#define Motor7_Nreset_OPTstatus		OPT7_ON()
+
 #endif
+
+#ifdef L298N_StepMotorCtrl
+#define Motor1_reset_direction 		Motor1_Dir_Forward()   // 磁分离42步进电机
+#define Motor1_Nreset_direction 	Motor1_Dir_Backward()
+#define Motor1_reset_OPTstatus		OPT1_ON()
+#define Motor1_Nreset_OPTstatus		OPT1_OFF()
+#define Motor2_reset_direction 		Motor2_Dir_Backward()	// 磁分离35步进电机
+#define Motor2_Nreset_direction 	Motor2_Dir_Forward()
+#define Motor2_reset_OPTstatus		OPT2_OFF()
+#define Motor2_Nreset_OPTstatus		OPT2_ON()
+#define Motor3_reset_direction 		Motor3_Dir_Forward()
+#define Motor3_Nreset_direction 	Motor3_Dir_Backward()
+#define Motor3_reset_OPTstatus		OPT3_ON()
+#define Motor3_Nreset_OPTstatus		OPT3_OFF()
+
+#define Motor5_reset_OPTstatus		OPT5_OFF()
+#define Motor5_Nreset_OPTstatus		OPT5_ON()
+#define Motor6_reset_OPTstatus		OPT6_OFF()
+#define Motor6_Nreset_OPTstatus		OPT6_ON()
+#endif
+
 
 #define Motor4_reset_direction 		Motor4_Dir_Forward()	// 磁分离&加样针柱塞泵
 #define Motor4_Nreset_direction 	Motor4_Dir_Backward()
 #define Motor4_reset_OPTstatus		OPT4_OFF()
 #define Motor4_Nreset_OPTstatus		OPT4_ON()
 
-
-#define Motor5_reset_OPTstatus		OPT9_OFF()
-#define Motor5_Nreset_OPTstatus		OPT9_ON()
-
-#define Motor6_reset_OPTstatus		OPT10_ON()
-#define Motor6_Nreset_OPTstatus		OPT10_OFF()
 
 
 #ifdef DuoTongDao

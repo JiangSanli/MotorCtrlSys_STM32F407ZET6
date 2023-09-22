@@ -278,10 +278,64 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         		;
         	}
         	else {
-        		//Follow_state = 2;		// 使用入液�???测模块时，IO下降沿中断检�???
+        		//Follow_state = 2;		// 使用入液�???测模块时，IO下降沿中断检�???
         	}
             break;
 
+#ifdef L298N_StepMotorCtrl
+        case OPT_IN1_Pin:
+        	if (OPT_IN1_GPIO_Port->IDR & OPT_IN1_Pin){ 	// if Rising edge trigger
+        		if(Motor[1].MotorDirection == 0){
+        			Motor[1].StepPosition =0 ;
+        		}
+        	}
+            break;
+
+        case OPT_IN2_Pin:
+        	if (OPT_IN2_GPIO_Port->IDR & OPT_IN2_Pin){ 	// if Rising edge trigger
+        		if(Motor[2].MotorDirection == 0){
+        			Motor[2].StepPosition =0 ;
+        		}
+        	}
+        	break;
+
+        case OPT_IN3_Pin:
+        	if (OPT_IN3_GPIO_Port->IDR & OPT_IN3_Pin){ 	// if Rising edge trigger
+        		if(Motor[3].MotorDirection == 0){
+        			Motor[3].StepPosition =0 ;
+        		}
+        	}
+        	break;
+#endif
+
+#ifdef ALL_4port_5V
+        case OPT_IN5_Pin:
+        	if (OPT_IN5_GPIO_Port->IDR & OPT_IN5_Pin){ 	// if Rising edge trigger
+        		if(Motor[5].MotorDirection == 0){
+        			Motor[5].StepPosition =0 ;
+        		}
+        	}
+            break;
+
+        case OPT_IN6_Pin:
+        	if (OPT_IN6_GPIO_Port->IDR & OPT_IN6_Pin){ 	// if Rising edge trigger
+        		if(Motor[6].MotorDirection == 0){
+        			Motor[6].StepPosition =0 ;
+        		}
+        	}
+        	break;
+
+        case OPT_IN7_Pin:
+        	if (OPT_IN7_GPIO_Port->IDR & OPT_IN7_Pin){ 	// if Rising edge trigger
+        		if(Motor[7].MotorDirection == 0){
+        			Motor[7].StepPosition =0 ;
+        		}
+        	}
+        	break;
+#endif
+
+
+#ifdef CiFenLi
         case OPT_IN1_Pin:
         	if (OPT_IN1_GPIO_Port->IDR & OPT_IN1_Pin){ 	// if Rising edge trigger
         		;
@@ -293,7 +347,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         	}
             break;
 
-#ifdef CiFenLi
         case OPT_IN2_Pin:
         	if (OPT_IN2_GPIO_Port->IDR & OPT_IN2_Pin){ 	// if Rising edge trigger
         		Motor[2].StepPosition =0 ;

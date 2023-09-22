@@ -1,1 +1,4 @@
-../Core/Src/myTasks/myTask03.c:716:6:StartTask03	17
+../Core/Src/myTasks/myTask03.c:871:9:DTD_Motors_Init	8
+../Core/Src/myTasks/myTask03.c:926:9:DTD_All_Motors_Idle	2
+../Core/Src/myTasks/myTask03.c:937:9:DTD_Motors_Standby_State	4
+../Core/Src/myTasks/myTask03.c:965:6:StartTask03	54

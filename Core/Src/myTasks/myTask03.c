@@ -720,6 +720,7 @@ void StartTask03(void *argument)
 
 	Motor_Data_Init();
 	VM5_Enable_A();	VM5_Enable_B();
+	VM7_Enable_A();	VM7_Enable_B();
 	VM6_Enable_A();	VM6_Enable_B();
 	Motor6_Release();
 	Motor6_MicroSteps_Table_Init();
@@ -765,21 +766,96 @@ void StartTask03(void *argument)
 			break;
 
 		case 10:
-			Start_DMA_ADC1_CH10CH11();
 			myTask03_Status = INITPASSSTATE;
 			break;
 
 		case 20:
-			for (uint16_t i=0 ; i<30 ; i++){
-				printf("\t***ADC1 Values: %d, %d ***\r\n",get_ADC1_Current_Phase(0),get_ADC1_Current_Phase(1));
-				//printf("\t***ADC1 Values: %d, %d ***\r\n",ADC_Values[0],ADC_Values[1]);
-				osDelay(200);
-			}
 			myTask03_Status = INITPASSSTATE;
 			break;
 
 		case 30:
-			STOP_DMA_ADC1_CH10CH11();
+			myTask03_Status = INITPASSSTATE;
+			break ;
+
+		}
+	}
+
+}
+#endif
+
+#ifdef ALL_4port_5V
+void StartTask03(void *argument)
+{
+	osDelay(10);
+	printf("myTask03 starts! \r\n");
+
+	Motor_Data_Init();
+	VM5_Enable_A();	VM5_Enable_B();
+	VM6_Enable_A();	VM6_Enable_B();
+	VM7_Enable_A();	VM7_Enable_B();
+	myTask03_Status = INITPASSSTATE;
+
+
+	for(;;)
+	{
+		osDelay(1);
+		switch (myTask03_Status)
+		{
+		case INITPASSSTATE:
+			osDelay(10);
+			if(KEY0_Pressed())
+			{
+				osDelay(20);
+				if(KEY0_Pressed())
+				{
+					osDelay(20);
+					while (KEY0_Pressed()){osDelay(1);}
+					myTask03_Status = 10;
+				}
+			}
+			if(KEY1_Pressed())
+			{
+				osDelay(20);
+				if(KEY1_Pressed())
+				{
+					osDelay(20);
+					while (KEY1_Pressed()){osDelay(1);}
+					myTask03_Status = 20;
+				}
+			}
+			if(KEY2_Pressed())
+			{
+				osDelay(20);
+				if(KEY2_Pressed())
+				{
+					osDelay(20);
+					while (KEY2_Pressed()){osDelay(1);}
+					myTask03_Status = 30;
+				}
+			}
+			break;
+
+		case 10:
+			Motor[5].NumberofRads = 20 ;
+			MotorMove_steps(&Motor[5]);
+			myTask03_Status = 11;
+			break;
+
+		case 11:
+			if (Motor[5].Status == 0){
+				Motor_Reset(&Motor[5]);
+				osDelay(1000);
+				MotorMove_position(&Motor[5] , 5) ;
+				myTask03_Status = INITPASSSTATE;
+			}
+			osDelay(100);
+			break;
+
+		case 20:
+			myTask03_Status = INITPASSSTATE;
+			break;
+
+		case 30:
 			myTask03_Status = INITPASSSTATE;
 			break ;
 
@@ -894,19 +970,19 @@ void StartTask03(void *argument)
 	Motor_Data_Init();
 	DuoTongDao_Position_Init();
 	osDelay(300);
-//	if ( DTD_Motors_Init() ){
-//		printf("Motors Initialization Completed! \r\n");
-//		myTask03_Status = INITPASSSTATE;
-//	}
-//	else{
-//		myTask03_Status = INITFAILSTATE;
-//	}
+	if ( DTD_Motors_Init() ){
+		printf("Motors Initialization Completed! \r\n");
+		myTask03_Status = INITPASSSTATE;
+	}
+	else{
+		myTask03_Status = INITFAILSTATE;
+	}
 
 //	Motor2_Enable();
 //	Motor3_Enable();
-	VM5_Enable_A();	VM5_Enable_B();
-	VM6_Enable_A();	VM6_Enable_B();
-	myTask03_Status = INITFAILSTATE;
+//	VM5_Enable_A();	VM5_Enable_B();
+//	VM6_Enable_A();	VM6_Enable_B();
+//	myTask03_Status = INITFAILSTATE;
 
 	uint8_t temp_n = 0 ;
 
@@ -1081,16 +1157,6 @@ void StartTask03(void *argument)
 				}
 			}
 		break;
-
-
-
-
-
-
-
-
-
-
 
 
 		case 130:	//老化测试
